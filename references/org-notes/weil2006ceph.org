@@ -1,0 +1,2 @@
+#+TITLE: Notes on: Weil, S. A., Brandt, S. A., Miller, E. L., Long, D. D., & Maltzahn, C. (2006): Ceph: a scalable, high-performance distributed file system
+

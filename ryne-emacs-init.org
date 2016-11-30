@@ -1,0 +1,341 @@
+* Configuration
+** About this file
+ Based on Sacha Chua's Emacs configuration
+
+
+** required software
+- sudo apt install gnuplot
+- sudo apt install texlive-full
+- sudo apt install clang
+- sudo apt install global
+- sudo apt install git
+
+** General configuration
+*** Save current session
+#+BEGIN_SRC emacs-lisp :tangle yes
+(desktop-save-mode 1)
+#+END_SRC
+
+
+** Starting up
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (require 'package)
+  (add-to-list 'package-archives '("melpa" .  "http://melpa.org/packages/") 'APPEND)
+  (add-to-list 'package-archives '("melpa-stable" . "http://stable.melpa.org/packages/") t)
+  (package-initialize)
+  (package-refresh-contents)
+  (unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
+
+  (eval-when-compile
+    (require 'use-package))
+  (require 'diminish)
+  (require 'bind-key)
+
+#+END_SRC
+
+
+** Personal information
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (setq user-full-name "Zhenqiang Li"
+        user-email-address "lizhenqiangsnake@gmail.com")
+#+END_SRC
+
+
+** Latex
+*** header template for latex
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun ryne-org-latex-header ()
+    (interactive)
+    (progn
+      (insert "#+TITLE: \n"
+              "#+AUTHOR: \n"
+              "#+DATE: \\today \n"
+              ;; avoid redbox around link
+              "#+LATEX_HEADER: \\hypersetup{hidelinks=true}\n"
+              ;; correct reference, just use \cite{key} for reference, see helm-bibtex for more info
+              "#+LaTeX_HEADER: \\usepackage[backend=bibtex,sorting=none]{biblatex}\n"
+              "#+LaTeX_HEADER: \\addbibresource{~/.emacs.d/references/main.bib}\n"
+              "#+OPTIONS: H:2 num:t toc:nil ^:nil\n")))
+#+END_SRC
+
+*** tex
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package tex :ensure auctex)
+#+END_SRC
+
+
+** Git
+*** magit
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package magit
+    :ensure t)
+#+END_SRC
+
+*** TODO git-gutter
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package git-gutter
+    :ensure t)
+#+END_SRC
+
+
+** Fuzzy search anything
+*** helm
+#+BEGIN_SRC emacs-lisp :exports none
+  (use-package helm
+    :ensure t
+    :diminish helm-mode
+    :init
+    (progn
+      (require 'helm-config)
+      (setq helm-candidate-number-limit 100)
+      ;; From https://gist.github.com/antifuchs/9238468
+      (setq helm-idle-delay 0.0 ; update fast sources immediately (doesn't).
+            helm-input-idle-delay 0.01  ; this actually updates things
+                                          ; reeeelatively quickly.
+            helm-yas-display-key-on-candidate t
+            helm-quick-update t
+            helm-M-x-requires-pattern nil
+            helm-ff-skip-boring-files t)
+      (helm-mode))
+    :bind (("C-c h" . helm-mini)
+           ;; ("C-x C-f" . helm-find-files)
+           ("C-h a" . helm-apropos)
+           ("C-x C-b" . helm-buffers-list)
+           ("C-x b" . helm-buffers-list)
+           ("M-y" . helm-show-kill-ring)
+           ("M-x" . helm-M-x)
+           ("C-x c o" . helm-occur)
+           ("C-x c s" . helm-swoop)
+           ("C-x c y" . helm-yas-complete)
+           ("C-x c Y" . helm-yas-create-snippet-on-region)
+           ("C-x c b" . my/helm-do-grep-book-notes)
+           ("C-x c SPC" . helm-all-mark-rings)))
+#+END_SRC
+
+**** helm-gtags
+- helm-gtags-find-tag-from-here
+- helm-gtags-show-stack
+- helm-gtags-pop-stack
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package helm-gtags
+    :ensure t)
+#+END_SRC
+
+**** helm-bibtex
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package helm-bibtex
+    :ensure t
+    :pin melpa-stable
+    :config
+    (progn
+      (setq bibtex-completion-bibliography
+            '("~/.emacs.d/references/main.bib"))
+      ;;; bibtex-completion assume pdf name is key.pdf, e.g. for key "Darwin1859", the pdf name is "Darwin1859.pdf"
+      (setq bibtex-completion-library-path
+            '("~/.emacs.d/references/pdfs"))
+      (setq bibtex-completion-notes-path "~/.emacs.d/references/org-notes/")))
+#+END_SRC
+
+*** ido
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package ido-ubiquitous :ensure t :pin melpa-stable
+    :config (progn
+              (defun ido-imenu ()
+                "Update the imenu index and then use ido to select a symbol to navigate to.
+  Symbols matching the text at point are put first in the completion list."
+                (interactive)
+                (imenu--make-index-alist)
+                (let ((name-and-pos '())
+                      (symbol-names '()))
+                  (flet ((addsymbols (symbol-list)
+                                     (when (listp symbol-list)
+                                       (dolist (symbol symbol-list)
+                                         (let ((name nil) (position nil))
+                                           (cond
+                                            ((and (listp symbol) (imenu--subalist-p symbol))
+                                             (addsymbols symbol))
+
+                                            ((listp symbol)
+                                             (setq name (car symbol))
+                                             (setq position (cdr symbol)))
+
+                                            ((stringp symbol)
+                                             (setq name symbol)
+                                             (setq position (get-text-property 1 'org-imenu-marker symbol))))
+
+                                           (unless (or (null position) (null name))
+                                             (add-to-list 'symbol-names name)
+                                             (add-to-list 'name-and-pos (cons name position))))))))
+                    (addsymbols imenu--index-alist))
+                  ;; If there are matching symbols at point, put them at the beginning of `symbol-names'.
+                  (let ((symbol-at-point (thing-at-point 'symbol)))
+                    (when symbol-at-point
+                      (let* ((regexp (concat (regexp-quote symbol-at-point) "$"))
+                             (matching-symbols (delq nil (mapcar (lambda (symbol)
+                                                                   (if (string-match regexp symbol) symbol))
+                                                                 symbol-names))))
+                        (when matching-symbols
+                          (sort matching-symbols (lambda (a b) (> (length a) (length b))))
+                          (mapc (lambda (symbol) (setq symbol-names (cons symbol (delete symbol symbol-names))))
+                                matching-symbols)))))
+                  (let* ((selected-symbol (ido-completing-read "Symbol? " symbol-names))
+                         (position (cdr (assoc selected-symbol name-and-pos))))
+                    (push-mark (point))
+                    (goto-char position))))
+              (bind-key "C-c C-i" 'ido-imenu)
+
+              (ido-mode t)
+              (ido-ubiquitous-mode)
+              (ido-everywhere t)
+              (add-to-list 'ido-ignore-files "\\.DS_Store")
+              (add-hook 'ido-setup-hook
+                        (lambda ()
+                          ;; Go straight home
+                          (define-key ido-file-completion-map (kbd "~")
+                            (lambda ()
+                              (interactive)
+                              (if (looking-back "/")
+                                  (insert "~/")
+                                (call-interactively 'self-insert-command))))))))
+
+  (use-package flx-ido :ensure t :pin melpa-stable
+    :init (setq ido-use-faces nil) ; disable ido faces to see flx highlights
+    :config (flx-ido-mode t))
+
+  (use-package smex :ensure t :pin melpa-stable
+    :init (setq smex-save-file (concat user-emacs-directory ".smex-items"))
+    :bind (("M-x" . smex)
+  ("C-x C-m" . smex)))
+#+END_SRC
+*** projects browser
+#+begin_src emacs-lisp :tangle yes
+  (use-package projectile
+    :ensure t
+    :diminish projectile-mode
+    :config
+    (progn
+      (setq projectile-keymap-prefix (kbd "C-c p"))
+      (setq projectile-completion-system 'default)
+      (setq projectile-enable-caching t)
+      (setq projectile-require-project-root nil)
+      (setq projectile-indexing-method 'alien)
+      (add-to-list 'projectile-globally-ignored-files "node-modules"))
+    :config
+    (projectile-global-mode))
+  (use-package helm-projectile
+    :ensure t
+    :bind (("C-x p f" . projectile-find-file)))
+#+end_src
+
+
+** org-mode configure
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((dot . t)
+     (python . t)
+     (sh . t))) ; this line activates dot
+
+  ;; Do not need confirm to execute source code
+  (setq org-confirm-babel-evaluate nil)
+
+  ;; Refresh inline images when execute python code
+  (defun ryne-org-ctrl-c-ctrl-c ()
+    (interactive)
+    (progn
+      (org-ctrl-c-ctrl-c)
+      (org-redisplay-inline-images)))
+
+  ;; http://tex.stackexchange.com/questions/197707/using-bibtex-from-org-mode-bbl-and-aux-files-are-incorrectly-generated
+  ;; used for org-mode reference
+  (setq org-latex-pdf-process
+    '("latexmk -pdflatex='pdflatex -interaction nonstopmode' -pdf -bibtex -f %f"))
+#+END_SRC
+
+** Gnuplot
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package gnuplot
+    :ensure t)
+  (use-package gnuplot-mode
+    :ensure t)
+#+END_SRC
+
+** UI config
+*** org-mode color theme
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package leuven-theme
+    :ensure t)
+#+END_SRC
+*** PowerLine
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package powerline
+    :ensure t
+    :init (setq powerline-default-separator 'wave))
+#+END_SRC
+
+***
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package rainbow-delimiters
+    :ensure t
+    :init (add-hook 'prog-mode-hook 'rainbow-delimiters-mode))
+#+END_SRC
+*** Keyword Highlights
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun add-watchwords ()
+    (font-lock-add-keywords
+     nil '(("\\<\\(FIX\\|TODO\\|FIXME\\|HACK\\|REFACTOR\\|NOCOMMIT\\)"
+            1 font-lock-warning-face t))))
+#+END_SRC
+
+
+** side bar
+*** linum
+#+BEGIN_SRC emacs-lisp :tangle yes
+#+END_SRC
+
+** Auto-completion
+Copy from [[https://github.com/sandhu/emacs.d/tree/master/config][Sandhu's github configuration]]
+*** Completion Configure
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package company :ensure t
+    :init (setq company-idle-delay 0.2
+                company-tooltip-limit 10
+                company-minimum-prefix-length 2
+                company-tooltip-flip-when-above t)
+    :config (global-company-mode 1)
+    :diminish " α")
+
+  (use-package company-flx :ensure t
+    :config (company-flx-mode +1))
+
+  (use-package company-quickhelp :ensure t
+  :config (company-quickhelp-mode 1))
+#+END_SRC
+
+
+** Function Header Navigate
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package sr-speedbar
+    :ensure t
+    :defer t
+    :init
+    ;; Show tree on the left side
+    (setq sr-speedbar-right-side nil)
+    ;; Show all files
+    (setq speedbar-show-unknown-files t)
+    ;; Bigger size (default is 24)
+    (setq sr-speedbar-width 35))
+#+END_SRC
+
+** Languages specific
+*** TODO c++
+#+BEGIN_SRC emacs-lisp :tangle yes
+
+#+END_SRC
+*** python
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package python-mode
+    :ensure t)
+#+END_SRC
