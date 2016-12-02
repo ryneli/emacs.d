@@ -268,11 +268,9 @@
   (use-package leuven-theme
     :ensure t)
 #+END_SRC
-*** PowerLine
+*** TODO PowerLine
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package powerline
-    :ensure t
-    :init (setq powerline-default-separator 'wave))
+
 #+END_SRC
 
 ***
@@ -289,11 +287,77 @@
             1 font-lock-warning-face t))))
 #+END_SRC
 
-
-** side bar
-*** linum
+*** Window margin setting
 #+BEGIN_SRC emacs-lisp :tangle yes
+  ;; Margin Manager
+  (mapc #'make-variable-buffer-local '(mm-overlays))
+
+  (defun mm-push-overlay (o)
+    "Push one overlay"
+    (push o mm-overlays))
+
+  (defun mm-delete-overlays ()
+    "Delete all overlays displaying line numbers for this buffer."
+    (mapc #'delete-overlay mm-overlays)
+    (setq mm-overlays nil))
+
+  (defun mm-margin-line (linum lstr rstr)
+    "Update window WIN's LINUM line's left margin to LSTR and right margin to RSTR."
+    (setq currp (point))
+    ;; DONT use goto-line, it will set-mark
+    (forward-line (- linum (line-number-at-pos)))
+    (let ((startp (point))
+          (endp nil))
+      (forward-line)
+      (setq endp (1- (point)))
+      (let ((ov (make-overlay startp endp)))
+        (mm-push-overlay ov)
+        (overlay-put ov 'before-string
+                     (propertize " " 'display `((margin left-margin) ,lstr)))))
+    (goto-char currp))
+
+  (defun mm-margin-current-window ()
+   "Update current window"
+   (let ((curr-pos (point))
+         (curr-line (line-number-at-pos))
+         (startp (window-start))
+         (endp (window-end nil t)))
+     (mm-delete-overlays)
+     ;; if left-margin less than 2, set it to 2
+     (if (or (not (car (window-margins))) (< (car (window-margins)) 2))
+         (set-window-margins nil 2 nil))
+     (mm-margin-line curr-line (format "%2d" curr-line) nil)
+     ;; numbering lines below
+     (forward-line)
+     (setq line 1)
+     (while (and (not (eobp)) (<= (point) endp))
+       (mm-margin-line (line-number-at-pos) (format "%2d" line) nil)
+       (forward-line)
+       (setq line (1+ line)))
+     (goto-char curr-pos)
+     ;; numbering lines above
+     (setq line 1)
+     (forward-line -1)
+     (while (> (point) startp)
+       (mm-margin-line (line-number-at-pos)
+                       (format "%2d" line)
+                       nil)
+       (forward-line -1)
+       (setq line (1+ line))
+       )
+     (goto-char curr-pos)
+     ))
+
+  (add-hook 'post-command-hook 'mm-margin-current-window t)
+
+  ;; (set-window-margins nil 20 nil)
+  ;; (mm-margin-line 47 "A " nil)
+  ;; (mm-margin-current-window)
+  ;; (set-mark-command (point))
+  ;; (print post-command-hook)
+
 #+END_SRC
+
 
 ** Auto-completion
 Copy from [[https://github.com/sandhu/emacs.d/tree/master/config][Sandhu's github configuration]]
@@ -315,6 +379,12 @@ Copy from [[https://github.com/sandhu/emacs.d/tree/master/config][Sandhu's githu
 #+END_SRC
 
 
+** Give CEDET a try
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (semantic-mode 1)
+  (global-ede-mode 1)
+#+END_SRC
+
 ** Function Header Navigate
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package sr-speedbar
@@ -326,7 +396,9 @@ Copy from [[https://github.com/sandhu/emacs.d/tree/master/config][Sandhu's githu
     ;; Show all files
     (setq speedbar-show-unknown-files t)
     ;; Bigger size (default is 24)
-    (setq sr-speedbar-width 35))
+    (setq sr-speedbar-width 30)
+    ;; clean workspace
+    (setq sr-speedbar-delete-windows t))
 #+END_SRC
 
 ** Languages specific
