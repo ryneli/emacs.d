@@ -320,27 +320,36 @@
    "Update current window"
    (let ((curr-pos (point))
          (curr-line (line-number-at-pos))
+         (default-width 2) ; default margin width
          (startp (window-start))
          (endp (window-end nil t)))
      (mm-delete-overlays)
-     ;; if left-margin less than 2, set it to 2
-     (if (or (not (car (window-margins))) (< (car (window-margins)) 2))
-         (set-window-margins nil 2 nil))
-     (mm-margin-line curr-line (format "%2d" curr-line) nil)
-     ;; numbering lines below
+     ;; determine margin width
+     (setq width (max
+                  default-width
+                  (if (not (car (window-margins))) 0 (car (window-margins)))
+                  (length (number-to-string curr-line))))
+     (set-window-margins nil width nil)
+     ;; set format string
+     (setq fmt (concat "%"
+                       (number-to-string (length (number-to-string curr-line)))
+                       "d"))
+     ;; numbering lines
+     (mm-margin-line curr-line (format fmt curr-line) nil)
+     ; numbering lines below
      (forward-line)
      (setq line 1)
      (while (and (not (eobp)) (<= (point) endp))
-       (mm-margin-line (line-number-at-pos) (format "%2d" line) nil)
+       (mm-margin-line (line-number-at-pos) (format fmt line) nil)
        (forward-line)
        (setq line (1+ line)))
      (goto-char curr-pos)
-     ;; numbering lines above
+     ; numbering lines above
      (setq line 1)
      (forward-line -1)
      (while (> (point) startp)
        (mm-margin-line (line-number-at-pos)
-                       (format "%2d" line)
+                       (format fmt line)
                        nil)
        (forward-line -1)
        (setq line (1+ line))
