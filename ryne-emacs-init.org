@@ -9,7 +9,9 @@
 - sudo apt install clang
 - sudo apt install global
 - sudo apt install git
-
+*** start as daemon
+1. add `emacs --daemon` in .bashrc or .zshrc
+2. bind `Ctrl Alt z` to command `emacsclient -c`
 ** General configuration
 *** Save current session
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -327,7 +329,8 @@
      ;; determine margin width
      (setq width (max
                   default-width
-                  (if (not (car (window-margins))) 0 (car (window-margins)))
+                  ; current window margin is not used
+                  ; (if (not (car (window-margins))) 0 (car (window-margins)))
                   (length (number-to-string curr-line))))
      (set-window-margins nil width nil)
      ;; set format string
