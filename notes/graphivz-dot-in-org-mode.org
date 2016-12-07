@@ -1,0 +1,11 @@
+#+BEGIN_SRC dot :file example.png
+  digraph G {
+    1->2 [ label ="1/2"];
+    2->3 [ label ="1/2"];
+    3->1 [ label ="1/2"];
+  }
+#+END_SRC
+
+#+RESULTS:
+[[file:example.png]]
+
