@@ -411,3 +411,8 @@ Copy from [[https://github.com/sandhu/emacs.d/tree/master/config][Sandhu's githu
   (use-package python-mode
     :ensure t)
 #+END_SRC
+*** golang
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package go-mode
+    :ensure t)
+#+END_SRC
