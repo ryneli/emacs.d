@@ -1,0 +1,4 @@
+#+TITLE: Notes on: Wang, R., Chen, F., Chen, Z., Li, T., Harari, G., Tignor, S., Zhou, X., Ben-Zeev, D., Campbell, A. T., ... (2014): Studentlife: assessing mental health, academic performance and behavioral trends of college students using smartphones
+
+* Data needed
+although they need lots of data to infer the behavioral classifier, they can do these work in the mobile phone to avoid collect user sensitive data.

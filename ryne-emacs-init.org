@@ -9,7 +9,11 @@
 - sudo apt install clang
 - sudo apt install global
 - sudo apt install git
-
+- sudo apt install ditaa
+- sudo apt install graphviz
+*** start as daemon
+1. add `emacs --daemon` in .bashrc or .zshrc
+2. bind `Ctrl Alt z` to command `emacsclient -c`
 ** General configuration
 *** Save current session
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -75,8 +79,7 @@
 
 *** TODO git-gutter
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package git-gutter
-    :ensure t)
+
 #+END_SRC
 
 
@@ -232,11 +235,15 @@
 
 ** org-mode configure
 #+BEGIN_SRC emacs-lisp :tangle yes
+  ;; active babel support languange
   (org-babel-do-load-languages
    'org-babel-load-languages
    '((dot . t)
      (python . t)
-     (sh . t))) ; this line activates dot
+     (ditaa . t)
+     (sh . t)))
+  ;; set ditaa jar path
+  (setq org-ditaa-jar-path "/usr/share/ditaa/ditaa.jar")
 
   ;; Do not need confirm to execute source code
   (setq org-confirm-babel-evaluate nil)
@@ -252,6 +259,10 @@
   ;; used for org-mode reference
   (setq org-latex-pdf-process
     '("latexmk -pdflatex='pdflatex -interaction nonstopmode' -pdf -bibtex -f %f"))
+#+END_SRC
+*** use ditaa for graph
+#+BEGIN_SRC emacs-lisp :tangle yes
+
 #+END_SRC
 
 ** Gnuplot
@@ -320,27 +331,37 @@
    "Update current window"
    (let ((curr-pos (point))
          (curr-line (line-number-at-pos))
+         (default-width 2) ; default margin width
          (startp (window-start))
          (endp (window-end nil t)))
      (mm-delete-overlays)
-     ;; if left-margin less than 2, set it to 2
-     (if (or (not (car (window-margins))) (< (car (window-margins)) 2))
-         (set-window-margins nil 2 nil))
-     (mm-margin-line curr-line (format "%2d" curr-line) nil)
-     ;; numbering lines below
+     ;; determine margin width
+     (setq width (max
+                  default-width
+                  ; current window margin is not used
+                  ; (if (not (car (window-margins))) 0 (car (window-margins)))
+                  (length (number-to-string curr-line))))
+     (set-window-margins nil width nil)
+     ;; set format string
+     (setq fmt (concat "%"
+                       (number-to-string (length (number-to-string curr-line)))
+                       "d"))
+     ;; numbering lines
+     (mm-margin-line curr-line (format fmt curr-line) nil)
+     ; numbering lines below
      (forward-line)
      (setq line 1)
      (while (and (not (eobp)) (<= (point) endp))
-       (mm-margin-line (line-number-at-pos) (format "%2d" line) nil)
+       (mm-margin-line (line-number-at-pos) (format fmt line) nil)
        (forward-line)
        (setq line (1+ line)))
      (goto-char curr-pos)
-     ;; numbering lines above
+     ; numbering lines above
      (setq line 1)
      (forward-line -1)
      (while (> (point) startp)
        (mm-margin-line (line-number-at-pos)
-                       (format "%2d" line)
+                       (format fmt line)
                        nil)
        (forward-line -1)
        (setq line (1+ line))
@@ -379,10 +400,9 @@ Copy from [[https://github.com/sandhu/emacs.d/tree/master/config][Sandhu's githu
 #+END_SRC
 
 
-** Give CEDET a try
+** TODO Give CEDET a try
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (semantic-mode 1)
-  (global-ede-mode 1)
+
 #+END_SRC
 
 ** Function Header Navigate

@@ -1,0 +1,26 @@
+#+BEGIN_SRC dot :file ex1.png
+  digraph G {
+    1->2 [ label ="1/2"];
+    2->3 [ label ="1/2"];
+    3->1 [ label ="1/2"];
+  }
+#+END_SRC
+
+#+RESULTS:
+[[file:ex1.png]]
+
+#+BEGIN_SRC dot :file ex2.png
+  digraph G {
+    rankdir=LR;
+    splines=true;
+    node [shape=box, style="fill=green!20"];
+    a_1 [shape=circle, style="fill=cyan!20, draw=blue"];
+    a_1 -> b_2 [ label ="1/2"];
+    b_2 -> c_3 [ label ="1/2"];
+    c_3 -> a_1 [ label ="dot line", style=dotted];
+  }
+#+END_SRC
+
+#+RESULTS:
+[[file:ex2.png]]
+
