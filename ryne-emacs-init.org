@@ -84,6 +84,7 @@
 
 
 ** Fuzzy search anything
+- helm-locate :: find files
 *** helm
 #+BEGIN_SRC emacs-lisp :exports none
   (use-package helm
@@ -228,8 +229,7 @@
     :config
     (projectile-global-mode))
   (use-package helm-projectile
-    :ensure t
-    :bind (("C-x p f" . projectile-find-file)))
+    :ensure t)
 #+end_src
 
 
@@ -435,4 +435,15 @@ Copy from [[https://github.com/sandhu/emacs.d/tree/master/config][Sandhu's githu
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package go-mode
     :ensure t)
+#+END_SRC
+*** java
+#+BEGIN_SRC emacs-lisp :tangle yes
+
+#+END_SRC
+
+** Shortcut
+#+BEGIN_SRC emacs-lisp :tangle yes
+(global-set-key (kbd "C-x r") 'helm-imenu)
+(global-set-key (kbd "C-x d") 'helm-gtags-find-tag-from-here)
+(global-set-key (kbd "C-x p f") 'projectile-find-file)
 #+END_SRC
