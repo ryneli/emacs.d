@@ -370,7 +370,7 @@
      (goto-char curr-pos)
      ))
 
-  (add-hook 'post-command-hook 'mm-margin-current-window t)
+  ;; (add-hook 'post-command-hook 'mm-margin-current-window t)
 
   ;; (set-window-margins nil 20 nil)
   ;; (mm-margin-line 47 "A " nil)
