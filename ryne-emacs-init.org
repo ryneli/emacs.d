@@ -99,6 +99,7 @@
             helm-input-idle-delay 0.01  ; this actually updates things
                                           ; reeeelatively quickly.
             helm-yas-display-key-on-candidate t
+            helm-split-window-default-side 'left
             helm-quick-update t
             helm-M-x-requires-pattern nil
             helm-ff-skip-boring-files t)
