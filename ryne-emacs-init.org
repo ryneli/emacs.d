@@ -226,7 +226,8 @@
    '((dot . t)
      (python . t)
      (ditaa . t)
-     (sh . t)))
+     (sh . t)
+     (plantuml . t)))
   ;; set ditaa jar path
   (setq org-ditaa-jar-path "/usr/share/ditaa/ditaa.jar")
 
@@ -245,11 +246,19 @@
   (setq org-latex-pdf-process
     '("latexmk -pdflatex='pdflatex -interaction nonstopmode' -pdf -bibtex -f %f"))
 #+END_SRC
-*** use ditaa for graph
+*** TODO use ditaa for graph
 #+BEGIN_SRC emacs-lisp :tangle yes
 
 #+END_SRC
 
+
+*** use plantuml for UML
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package plantuml-mode
+    :ensure t
+    :init (setq org-plantuml-jar-path
+                (expand-file-name "~/.emacs.d/bin/plantuml.1.2017.14.jar")))
+#+END_SRC
 ** Gnuplot
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package gnuplot
@@ -403,7 +412,9 @@ Copy from [[https://github.com/sandhu/emacs.d/tree/master/config][Sandhu's githu
     ;; Bigger size (default is 24)
     (setq sr-speedbar-width 30)
     ;; clean workspace
-    (setq sr-speedbar-delete-windows t))
+    (setq sr-speedbar-delete-windows t)
+    )
+
 #+END_SRC
 
 ** Languages specific
