@@ -1,0 +1,31 @@
+*** Interfaces
+**** Adapter pattern
+Adapter is used to transform one class to another class to make it adapt to a specific API. In following example, ApplyProcessor.process only take Processor as input. However, what we have is a Filter, which doesn't extend Processor. So we need a FilterAdapter to transform Filter into a Processor.
+#+BEGIN_SRC plantuml :file adapter.png
+  ApplyProcessor *-- Processor
+  Processor <|-- FilterAdapter
+  FilterAdapter *-- Filter
+  class ApplyProcessor {
+  Void process(Processor)
+  }
+  class Processor {
+  String name()
+  Object process()
+  }
+  class FilterAdapter {
+  FilterAdapter(Filter)
+  }
+  class Filter {
+  String name()
+  WaveForm process()
+  }
+#+END_SRC
+
+#+RESULTS:
+[[file:adapter.png]]
+
+The usage of FilterAdapter is like this
+
+#+BEGIN_SRC java
+  ApplyProcessor.process(new FilterAdapter(filter));
+#+END_SRC
