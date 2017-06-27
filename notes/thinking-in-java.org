@@ -1,4 +1,7 @@
 *** Interfaces
+- Use class first, change to interface when refactor.
+- Do not use interface for enum, java has enum
+- Complete decoupling method by using interface as arguments and result.
 **** Adapter pattern
 Adapter is used to transform one class to another class to make it adapt to a specific API. In following example, ApplyProcessor.process only take Processor as input. However, what we have is a Filter, which doesn't extend Processor. So we need a FilterAdapter to transform Filter into a Processor.
 #+BEGIN_SRC plantuml :file adapter.png
@@ -29,3 +32,48 @@ The usage of FilterAdapter is like this
 #+BEGIN_SRC java
   ApplyProcessor.process(new FilterAdapter(filter));
 #+END_SRC
+**** TODO Factory pattern
+Factory pattern is a good choice to return a implementation of a interface or an abstract class. In following example, Service users could just take ServiceFactory as input and let ServiceFactory decide which Service is used. *It seems like that we could also take service as input, than pass in different ServiceImpl. Why we are borthered to add an extra factory layer?*
+#+BEGIN_SRC plantuml :file factory.png
+  ServiceFactory <|.. ServiceFactoryImpl
+  ServiceFactoryImpl *-- ServiceImpl
+  Service <|.. ServiceImpl
+  interface Service {
+
+  }
+
+  class ServiceImpl {
+  }
+
+  interface ServiceFactory {
+    Service getService()
+  }
+
+  class ServiceFactoryImpl {
+
+  }
+#+END_SRC
+
+#+RESULTS:
+[[file:factory.png]]
+
+*** Inner classes
+- Every inner class needs an reference to the enclosing class. It means when you create an inner class, you also create an enclosing class.
+- To create a new inner class, you need to creat enclosing class first.
+- Innter class is a Object-oriented closure, which hold all information of enclosing class.
+**** New innner class
+#+BEGIN_SRC java
+  public class DotNew {
+      public class Inner {}
+      public static void main(String[] args) {
+          DotNew dotNew = new DotNew();
+          DotNew.Inner inner = dotNew.new Inner();
+      }
+  }
+#+END_SRC
+
+**** Nested classes
+Inner class + static
+
+**** TODO Closure & callbacks
+
