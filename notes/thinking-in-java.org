@@ -2,6 +2,27 @@
 - Use class first, change to interface when refactor.
 - Do not use interface for enum, java has enum
 - Complete decoupling method by using interface as arguments and result.
+**** CompositionVsInheritance
+#+BEGIN_SRC plantuml :file compositionVsInheritance.png
+scale 1800*900
+car *-- engine
+shape <|-- circle
+shape <|-- rectangle
+
+plate <|-- dinnerPlate
+utensil <|-- spoon
+utensil <|-- fork
+utensil <|-- knife
+custom <|-- placeSetting
+placeSetting *-- spoon
+placeSetting *-- fork
+placeSetting *-- knife
+placeSetting *-- dinnerplate
+#+END_SRC
+
+#+RESULTS:
+[[file:compositionVsInheritance.png]]
+
 **** Adapter pattern
 Adapter is used to transform one class to another class to make it adapt to a specific API. In following example, ApplyProcessor.process only take Processor as input. However, what we have is a Filter, which doesn't extend Processor. So we need a FilterAdapter to transform Filter into a Processor.
 #+BEGIN_SRC plantuml :file adapter.png
