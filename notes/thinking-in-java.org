@@ -174,3 +174,31 @@ Proxy inserts an extra layer between the consumer and the *real* object.
 #+RESULTS:
 [[file:proxy_pattern.png]]
 
+*** TODO Generics [IMPORTANT]
+Java generics use *erasure*, so *List<Integer>* and *List<String>* are both *List* at runtime.
+**** C++ vs Java
+#+BEGIN_SRC C++
+  #include <iostream>
+  using namespace std;
+
+  template<class T> class Manipulator {
+    T obj;
+  public:
+    Manipulator(T x) { obj = x; }
+    void manipulate() { obj.f(); }
+  };
+
+  class HasF {
+  public:
+    void f() { cout << "HasF::f()" << endl; }
+  };
+
+  int main() {
+    HasF hf;
+    Manipulator<HasF> manipulator(hf);
+    manipulator.manipulate();
+  }
+#+END_SRC
+
+#+RESULTS:
+

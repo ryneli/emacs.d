@@ -228,6 +228,7 @@
      (ditaa . t)
      (sh . t)
      (java . t)
+     (C . t)
      (plantuml . t)))
   ;; set ditaa jar path
   (setq org-ditaa-jar-path "/usr/share/ditaa/ditaa.jar")
