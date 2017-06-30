@@ -99,6 +99,7 @@ Inner class + static
 **** TODO Closure & callbacks
 
 *** Type Information
+**** Class method extractor using Reflection
 #+HEADERS: :classname ShowMethods
 #+BEGIN_SRC java :results output :exports both :classname ShowMethods
   import java.lang.reflect.*;
@@ -112,8 +113,9 @@ Inner class + static
       }
       public static void main(String[] args) {
           int lines = 0;
+          String className = "ShowMethods"; // "java.lang.String"
           try {
-              Class<?> c = Class.forName("ShowMethods");
+              Class<?> c = Class.forName(className);
               Method[] methods = c.getMethods();
               Constructor[] ctors = c.getConstructors();
               for (Method method : methods) {
@@ -133,7 +135,6 @@ Inner class + static
 
 #+RESULTS:
 #+begin_example
-Test
 public static void main(String[])
 public final void wait(long,int) throws InterruptedException
 public final native void wait(long) throws InterruptedException
@@ -146,4 +147,30 @@ public final native void notify()
 public final native void notifyAll()
 public ShowMethods()
 #+end_example
+
+**** Proxy Pattern
+Proxy inserts an extra layer between the consumer and the *real* object.
+#+BEGIN_SRC plantuml :file proxy_pattern.png
+  interface Interface {
+    doSomething()
+    somethingElse()
+  }
+
+  class RealObject {
+  }
+
+  class SimpleProxy {
+  }
+
+  class Consumer {
+  }
+
+  Interface <|.. RealObject
+  Interface <|.. SimpleProxy
+  SimpleProxy *-- RealObject
+  Consumer *-- SimpleProxy
+#+END_SRC
+
+#+RESULTS:
+[[file:proxy_pattern.png]]
 
