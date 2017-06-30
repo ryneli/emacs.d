@@ -98,3 +98,107 @@ Inner class + static
 
 **** TODO Closure & callbacks
 
+*** Type Information
+**** Class method extractor using Reflection
+#+HEADERS: :classname ShowMethods
+#+BEGIN_SRC java :results output :exports both :classname ShowMethods
+  import java.lang.reflect.*;
+  import java.util.regex.*;
+
+  public class ShowMethods {
+      private static String usage = "";
+      private static Pattern p = Pattern.compile("\\w+\\.");
+      private static void print(String s) {
+          System.out.println(s);
+      }
+      public static void main(String[] args) {
+          int lines = 0;
+          String className = "ShowMethods"; // "java.lang.String"
+          try {
+              Class<?> c = Class.forName(className);
+              Method[] methods = c.getMethods();
+              Constructor[] ctors = c.getConstructors();
+              for (Method method : methods) {
+                  print(p.matcher(method.toString()).replaceAll(""));
+              }
+
+              for(Constructor ctor : ctors) {
+                  print(p.matcher(ctor.toString()).replaceAll(""));
+              }
+              lines = methods.length + ctors.length;
+          } catch(ClassNotFoundException e) {
+              print("No such class: " + e);
+          }
+      }
+  }
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+public static void main(String[])
+public final void wait(long,int) throws InterruptedException
+public final native void wait(long) throws InterruptedException
+public final void wait() throws InterruptedException
+public boolean equals(Object)
+public String toString()
+public native int hashCode()
+public final native Class getClass()
+public final native void notify()
+public final native void notifyAll()
+public ShowMethods()
+#+end_example
+
+**** Proxy Pattern
+Proxy inserts an extra layer between the consumer and the *real* object.
+#+BEGIN_SRC plantuml :file proxy_pattern.png
+  interface Interface {
+    doSomething()
+    somethingElse()
+  }
+
+  class RealObject {
+  }
+
+  class SimpleProxy {
+  }
+
+  class Consumer {
+  }
+
+  Interface <|.. RealObject
+  Interface <|.. SimpleProxy
+  SimpleProxy *-- RealObject
+  Consumer *-- SimpleProxy
+#+END_SRC
+
+#+RESULTS:
+[[file:proxy_pattern.png]]
+
+*** TODO Generics [IMPORTANT]
+Java generics use *erasure*, so *List<Integer>* and *List<String>* are both *List* at runtime.
+**** C++ vs Java
+#+BEGIN_SRC C++
+  #include <iostream>
+  using namespace std;
+
+  template<class T> class Manipulator {
+    T obj;
+  public:
+    Manipulator(T x) { obj = x; }
+    void manipulate() { obj.f(); }
+  };
+
+  class HasF {
+  public:
+    void f() { cout << "HasF::f()" << endl; }
+  };
+
+  int main() {
+    HasF hf;
+    Manipulator<HasF> manipulator(hf);
+    manipulator.manipulate();
+  }
+#+END_SRC
+
+#+RESULTS:
+
