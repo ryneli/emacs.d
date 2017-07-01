@@ -201,4 +201,186 @@ Java generics use *erasure*, so *List<Integer>* and *List<String>* are both *Lis
 #+END_SRC
 
 #+RESULTS:
+: HasF::f()
+
+#+BEGIN_SRC java :file HasF.java :classname HasF
+  class HasF {
+      public void f() {System.out.println("HasF.f()");}
+  }
+
+  class Manipulator<T> {
+      private T obj;
+      public Manipulator(T x) { obj = x; }
+      // Error: cannot find symbol: method f():
+      public void manipulate() { obj.f(); }
+  }
+
+  public class Manipulation {
+      public static void main(String[] args) {
+          HasF hf = new HasF();
+          Manipulator<HasF> manipulator =
+              new Manipulator<HasF>(hf);
+          manipulator.manipulate();
+      }
+  }
+#+END_SRC
+
+**** Reason of erasure
+A comprimise for the backward compitibility. So java's generic types cannot be used in operations that explicitly refer to runtime types, such as casts, instanceof operations, and new expressions.
+
+**** Mixins & Decorator pattern
+#+BEGIN_SRC C++
+  #include <string>
+  #include <ctime>
+  #include <iostream>
+  using namespace std;
+
+  template<class T> class TimeStamped : public T {
+    long timeStamp;
+  public:
+    TimeStamped() { timeStamp = time(0); }
+    long getStamp() { return timeStamp; }
+  };
+
+  template<class T> class SerialNumbered : public T {
+    long serialNumber;
+    static long counter;
+  public:
+    SerialNumbered() { serialNumber = counter++; }
+    long getSerialNumber() { return serialNumber; }
+  };
+
+  template<class T> long SerialNumbered<T>::counter = 1;
+
+  class Basic {
+    string value;
+  public:
+    void set(string val) { value = val; }
+    string get() { return value; }
+  };
+
+  int main() {
+    TimeStamped<SerialNumbered<Basic>> mixin1, mixin2;
+    mixin1.set("test string 1");
+    mixin2.set("test string 2");
+    cout << mixin1.get() << " " << mixin1.getStamp() << " "
+         << mixin1.getSerialNumber() << endl;
+    cout << mixin2.get() << " " << mixin2.getStamp() << " "
+         << mixin2.getSerialNumber() << endl;
+  }
+#+END_SRC
+
+#+RESULTS:
+| test | string | 1 | 1498857612 | 1 |
+| test | string | 2 | 1498857612 | 2 |
+
+In Java, we can use Decorator pattern to implement one layer mixin.
+#+BEGIN_SRC java :classname Decoration
+  import java.util.*;
+
+  class Basic {
+      private String value;
+      public void set(String val) { value = val; }
+      public String get() { return value; }
+  }
+
+  class Decorator extends Basic {
+      protected Basic basic;
+      public Decorator(Basic basic) { this.basic = basic; }
+      public void set(String val) { this.basic.set(val); }
+      public String get() { return this.basic.get(); }
+  }
+
+  class TimeStamped extends Decorator {
+      private final long timeStamp;
+      public TimeStamped(Basic basic) {
+          super(basic);
+          timeStamp = new Date().getTime();
+      }
+      public long getTimeStamp() { return timeStamp; }
+  }
+
+  public class Decoration {
+      public static void main(String[] args) {
+          TimeStamped t = new TimeStamped(new Basic());
+          System.out.println("time stamp = " + t.getTimeStamp());
+      }
+  }
+#+END_SRC
+
+#+RESULTS:
+: time stamp = 1498858194934
+
+**** Latent typing / duck typing
+Not related to static or dynamic type checking. Both Python and C++ support it, but not java.
+
+#+BEGIN_SRC python :results output
+  class Dog:
+      def speak(self):
+          print "Arf!"
+      def sit(self):
+          print "Sitting!"
+      def reproduce():
+          pass
+
+  class Robot:
+      def speak(self):
+          print "Click!"
+      def sit(self):
+          print "Clank!"
+      def oilChange(self):
+          pass
+
+  def perform(anything):
+      anything.speak()
+      anything.sit()
+
+  a = Dog()
+  b = Robot()
+  perform(a)
+  perform(b)
+#+END_SRC
+
+#+RESULTS:
+: Arf!
+: Sitting!
+: Click!
+: Clank!
+
+#+BEGIN_SRC C++
+  #include <iostream>
+  using namespace std;
+
+  class Dog {
+  public:
+    void speak() { cout << "Arf!" << endl; }
+    void sit() { cout << "Sitting!" << endl; }
+    void reproduce() {}
+  };
+
+  class Robot {
+  public:
+    void speak() { cout << "Click!" << endl; }
+    void sit() { cout << "Clank!" << endl; }
+    void oilChange() {}
+  };
+
+  template<class T> void perform(T anything) {
+    anything.speak();
+    anything.sit();
+  }
+
+  int main() {
+    Dog d;
+    Robot r;
+    perform(d);
+    perform(r);
+  }
+#+END_SRC
+
+#+RESULTS:
+| Arf!     |
+| Sitting! |
+| Click!   |
+| Clank!   |
 
