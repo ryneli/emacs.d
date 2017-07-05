@@ -227,6 +227,8 @@
      (python . t)
      (ditaa . t)
      (sh . t)
+     (java . t)
+     (C . t)
      (plantuml . t)))
   ;; set ditaa jar path
   (setq org-ditaa-jar-path "/usr/share/ditaa/ditaa.jar")
@@ -437,6 +439,11 @@ Copy from [[https://github.com/sandhu/emacs.d/tree/master/config][Sandhu's githu
 
 #+END_SRC
 
+*** groovy
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package groovy-mode
+    :ensure t)
+#+END_SRC
 ** Shortcut
 #+BEGIN_SRC emacs-lisp :tangle yes
   (global-set-key (kbd "C-x r") 'helm-imenu)

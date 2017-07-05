@@ -111,3 +111,472 @@ For complex string concate, you need to explicitly use StringBuilder
 #+END_SRC
 **** TODO Regular expressions
 
+*** Type Information
+**** Class method extractor using Reflection
+#+HEADERS: :classname ShowMethods
+#+BEGIN_SRC java :results output :exports both :classname ShowMethods
+  import java.lang.reflect.*;
+  import java.util.regex.*;
+
+  public class ShowMethods {
+      private static String usage = "";
+      private static Pattern p = Pattern.compile("\\w+\\.");
+      private static void print(String s) {
+          System.out.println(s);
+      }
+      public static void main(String[] args) {
+          int lines = 0;
+          String className = "ShowMethods"; // "java.lang.String"
+          try {
+              Class<?> c = Class.forName(className);
+              Method[] methods = c.getMethods();
+              Constructor[] ctors = c.getConstructors();
+              for (Method method : methods) {
+                  print(p.matcher(method.toString()).replaceAll(""));
+              }
+
+              for(Constructor ctor : ctors) {
+                  print(p.matcher(ctor.toString()).replaceAll(""));
+              }
+              lines = methods.length + ctors.length;
+          } catch(ClassNotFoundException e) {
+              print("No such class: " + e);
+          }
+      }
+  }
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+public static void main(String[])
+public final void wait(long,int) throws InterruptedException
+public final native void wait(long) throws InterruptedException
+public final void wait() throws InterruptedException
+public boolean equals(Object)
+public String toString()
+public native int hashCode()
+public final native Class getClass()
+public final native void notify()
+public final native void notifyAll()
+public ShowMethods()
+#+end_example
+
+**** Proxy Pattern
+Proxy inserts an extra layer between the consumer and the *real* object.
+#+BEGIN_SRC plantuml :file proxy_pattern.png
+  interface Interface {
+    doSomething()
+    somethingElse()
+  }
+
+  class RealObject {
+  }
+
+  class SimpleProxy {
+  }
+
+  class Consumer {
+  }
+
+  Interface <|.. RealObject
+  Interface <|.. SimpleProxy
+  SimpleProxy *-- RealObject
+  Consumer *-- SimpleProxy
+#+END_SRC
+
+#+RESULTS:
+[[file:proxy_pattern.png]]
+
+*** TODO Generics [IMPORTANT]
+Java generics use *erasure*, so *List<Integer>* and *List<String>* are both *List* at runtime.
+**** C++ vs Java
+#+BEGIN_SRC C++
+  #include <iostream>
+  using namespace std;
+
+  template<class T> class Manipulator {
+    T obj;
+  public:
+    Manipulator(T x) { obj = x; }
+    void manipulate() { obj.f(); }
+  };
+
+  class HasF {
+  public:
+    void f() { cout << "HasF::f()" << endl; }
+  };
+
+  int main() {
+    HasF hf;
+    Manipulator<HasF> manipulator(hf);
+    manipulator.manipulate();
+  }
+#+END_SRC
+
+#+RESULTS:
+: HasF::f()
+
+#+BEGIN_SRC java :file HasF.java :classname HasF
+  class HasF {
+      public void f() {System.out.println("HasF.f()");}
+  }
+
+  class Manipulator<T> {
+      private T obj;
+      public Manipulator(T x) { obj = x; }
+      // Error: cannot find symbol: method f():
+      public void manipulate() { obj.f(); }
+  }
+
+  public class Manipulation {
+      public static void main(String[] args) {
+          HasF hf = new HasF();
+          Manipulator<HasF> manipulator =
+              new Manipulator<HasF>(hf);
+          manipulator.manipulate();
+      }
+  }
+#+END_SRC
+
+**** Reason of erasure
+A comprimise for the backward compitibility. So java's generic types cannot be used in operations that explicitly refer to runtime types, such as casts, instanceof operations, and new expressions.
+
+**** Mixins & Decorator pattern
+#+BEGIN_SRC C++
+  #include <string>
+  #include <ctime>
+  #include <iostream>
+  using namespace std;
+
+  template<class T> class TimeStamped : public T {
+    long timeStamp;
+  public:
+    TimeStamped() { timeStamp = time(0); }
+    long getStamp() { return timeStamp; }
+  };
+
+  template<class T> class SerialNumbered : public T {
+    long serialNumber;
+    static long counter;
+  public:
+    SerialNumbered() { serialNumber = counter++; }
+    long getSerialNumber() { return serialNumber; }
+  };
+
+  template<class T> long SerialNumbered<T>::counter = 1;
+
+  class Basic {
+    string value;
+  public:
+    void set(string val) { value = val; }
+    string get() { return value; }
+  };
+
+  int main() {
+    TimeStamped<SerialNumbered<Basic>> mixin1, mixin2;
+    mixin1.set("test string 1");
+    mixin2.set("test string 2");
+    cout << mixin1.get() << " " << mixin1.getStamp() << " "
+         << mixin1.getSerialNumber() << endl;
+    cout << mixin2.get() << " " << mixin2.getStamp() << " "
+         << mixin2.getSerialNumber() << endl;
+  }
+#+END_SRC
+
+#+RESULTS:
+| test | string | 1 | 1498857612 | 1 |
+| test | string | 2 | 1498857612 | 2 |
+
+In Java, we can use Decorator pattern to implement one layer mixin.
+#+BEGIN_SRC java :classname Decoration
+  import java.util.*;
+
+  class Basic {
+      private String value;
+      public void set(String val) { value = val; }
+      public String get() { return value; }
+  }
+
+  class Decorator extends Basic {
+      protected Basic basic;
+      public Decorator(Basic basic) { this.basic = basic; }
+      public void set(String val) { this.basic.set(val); }
+      public String get() { return this.basic.get(); }
+  }
+
+  class TimeStamped extends Decorator {
+      private final long timeStamp;
+      public TimeStamped(Basic basic) {
+          super(basic);
+          timeStamp = new Date().getTime();
+      }
+      public long getTimeStamp() { return timeStamp; }
+  }
+
+  public class Decoration {
+      public static void main(String[] args) {
+          TimeStamped t = new TimeStamped(new Basic());
+          System.out.println("time stamp = " + t.getTimeStamp());
+      }
+  }
+#+END_SRC
+
+#+RESULTS:
+: time stamp = 1498858194934
+
+**** Latent typing / duck typing
+Not related to static or dynamic type checking. Both Python and C++ support it, but not java.
+
+#+BEGIN_SRC python :results output
+  class Dog:
+      def speak(self):
+          print "Arf!"
+      def sit(self):
+          print "Sitting!"
+      def reproduce():
+          pass
+
+  class Robot:
+      def speak(self):
+          print "Click!"
+      def sit(self):
+          print "Clank!"
+      def oilChange(self):
+          pass
+
+  def perform(anything):
+      anything.speak()
+      anything.sit()
+
+  a = Dog()
+  b = Robot()
+  perform(a)
+  perform(b)
+#+END_SRC
+
+#+RESULTS:
+: Arf!
+: Sitting!
+: Click!
+: Clank!
+
+#+BEGIN_SRC C++
+  #include <iostream>
+  using namespace std;
+
+  class Dog {
+  public:
+    void speak() { cout << "Arf!" << endl; }
+    void sit() { cout << "Sitting!" << endl; }
+    void reproduce() {}
+  };
+
+  class Robot {
+  public:
+    void speak() { cout << "Click!" << endl; }
+    void sit() { cout << "Clank!" << endl; }
+    void oilChange() {}
+  };
+
+  template<class T> void perform(T anything) {
+    anything.speak();
+    anything.sit();
+  }
+
+  int main() {
+    Dog d;
+    Robot r;
+    perform(d);
+    perform(r);
+  }
+#+END_SRC
+
+#+RESULTS:
+| Arf!     |
+| Sitting! |
+| Click!   |
+| Clank!   |
+
+*** Arrays
+
+*** Containers in Depth
+**** Strong reference, soft reference, weak reference, and phantom reference
+#+BEGIN_SRC java :classname References :results raw
+  import java.lang.ref.*;
+  import java.util.*;
+
+  class VeryBig {
+      private static final int SIZE = 10000;
+      private long[] la = new long[SIZE];
+      private String ident;
+      public VeryBig(String id) { ident = id; }
+      public String toString() { return ident; }
+      protected void finalize() {
+          System.out.println("Finalizing " + ident);
+      }
+  }
+
+  public class References {
+      private static ReferenceQueue<VeryBig> rq =
+          new ReferenceQueue<VeryBig>();
+      public static void checkQueue() {
+          Reference<? extends VeryBig> inq = rq.poll();
+          if (inq != null) {
+              System.out.println("In queue: " + inq.get());
+          }
+      }
+      public static void main(String[] args) {
+          int size = 10;
+
+          LinkedList<SoftReference<VeryBig>> sa =
+              new LinkedList<SoftReference<VeryBig>>();
+          for (int i = 0; i < size; i++) {
+              sa.add(new SoftReference<VeryBig>(new VeryBig("Soft " + i), rq));
+              System.out.println("Just created: " + sa.getLast());
+              checkQueue();
+          }
+
+          LinkedList<WeakReference<VeryBig>> wa =
+              new LinkedList<WeakReference<VeryBig>>();
+          for (int i = 0; i < size; i++) {
+              wa.add(new WeakReference<VeryBig>(new VeryBig("Weak " + i), rq));
+              System.out.println("Just created: " + wa.getLast());
+              checkQueue();
+          }
+
+          SoftReference<VeryBig> s =
+              new SoftReference<VeryBig>(new VeryBig("Soft"));
+          WeakReference<VeryBig> w =
+              new WeakReference<VeryBig>(new VeryBig("Weak"));
+          System.gc();
+
+          LinkedList<PhantomReference<VeryBig>> pa =
+              new LinkedList<PhantomReference<VeryBig>>();
+          for (int i = 0; i < size; i++) {
+              pa.add(new PhantomReference<VeryBig>(new VeryBig("Phantom " + i), rq));
+              System.out.println("Just created: " + pa.getLast());
+              checkQueue();
+          }
+      }
+  }
+#+END_SRC
+
+#+RESULTS:
+Just created: java.lang.ref.SoftReference@4aa298b7
+Just created: java.lang.ref.SoftReference@7d4991ad
+Just created: java.lang.ref.SoftReference@28d93b30
+Just created: java.lang.ref.SoftReference@1b6d3586
+Just created: java.lang.ref.SoftReference@4554617c
+Just created: java.lang.ref.SoftReference@74a14482
+Just created: java.lang.ref.SoftReference@1540e19d
+Just created: java.lang.ref.SoftReference@677327b6
+Just created: java.lang.ref.SoftReference@14ae5a5
+Just created: java.lang.ref.SoftReference@7f31245a
+Just created: java.lang.ref.WeakReference@6d6f6e28
+Just created: java.lang.ref.WeakReference@135fbaa4
+Just created: java.lang.ref.WeakReference@45ee12a7
+Just created: java.lang.ref.WeakReference@330bedb4
+Just created: java.lang.ref.WeakReference@2503dbd3
+Just created: java.lang.ref.WeakReference@4b67cf4d
+Just created: java.lang.ref.WeakReference@7ea987ac
+Just created: java.lang.ref.WeakReference@12a3a380
+Just created: java.lang.ref.WeakReference@29453f44
+Just created: java.lang.ref.WeakReference@5cad8086
+Finalizing Weak 4
+Just created: java.lang.ref.PhantomReference@6e0be858
+Finalizing Weak
+Finalizing Weak 9
+In queue: null
+Finalizing Weak 8
+Just created: java.lang.ref.PhantomReference@61bbe9ba
+In queue: null
+Finalizing Weak 7
+Just created: java.lang.ref.PhantomReference@610455d6
+Finalizing Weak 6
+In queue: null
+Finalizing Weak 5
+Just created: java.lang.ref.PhantomReference@511d50c0
+Finalizing Weak 3
+In queue: null
+Finalizing Weak 2
+Just created: java.lang.ref.PhantomReference@60e53b93
+Finalizing Weak 1
+In queue: null
+Finalizing Weak 0
+Just created: java.lang.ref.PhantomReference@5e2de80c
+In queue: null
+Just created: java.lang.ref.PhantomReference@1d44bcfa
+In queue: null
+Just created: java.lang.ref.PhantomReference@266474c2
+In queue: null
+Just created: java.lang.ref.PhantomReference@6f94fa3e
+In queue: null
+Just created: java.lang.ref.PhantomReference@5e481248
+In queue: null
+
+*** TODO I/O
+**** A directory lister
+#+NAME: DirList
+#+BEGIN_SRC java :classname DirList :cmdline "DirList .*.class"
+  import java.util.regex.*;
+  import java.io.*;
+  import java.util.*;
+
+  public class DirList {
+      public static void main(String[] args) {
+          File path = new File(".");
+          String[] list;
+          if (args.length == 0) {
+              list = path.list();
+          } else {
+              // public boolean accept(File dir, String name)
+              list = path.list((dir, name) -> Pattern.compile(args[0]).matcher(name).matches());
+          }
+          Arrays.sort(list, String.CASE_INSENSITIVE_ORDER);
+          for (String dirItem : list)
+              System.out.println(dirItem);
+      }
+  }
+
+#+END_SRC
+#+CALL: DirList[:cmdline "DirList .*.class"]()
+
+#+RESULTS:
+| DirFilter.class |
+| DirList.class   |
+
+**** Directory utilities
+#+BEGIN_SRC java :classname Directory
+  import java.util.regex.*;
+  import java.io.*;
+  import java.util.*;
+
+  public final class Directory {
+      public static File[]
+          local(File dir, final String regex) {
+          return dir.listFiles(
+                               (d, name) -> Pattern
+                               .compile(regex)
+                               .matcher(new File(name).getName())
+                               .matches());
+      }
+      public static File[]
+          local(String path, final String regex) {
+          return local(new File(path), regex);
+      }
+      public static class TreeInfo implements Iterable<File> {
+          public List<File> files = new ArrayList<File>();
+          public List<File> dirs = new ArrayList<File>();
+          public Iterator<File> iterator() {
+              return files.iterator();
+          }
+          void addAll(TreeInfo other) {
+              files.addAll(other.files);
+              dirs.addAll(other.dirs);
+          }
+      }
+  }
+#+END_SRC
+*** TODO Enumerated Types
+*** TODO Annotations
+*** TODO Concurrency
