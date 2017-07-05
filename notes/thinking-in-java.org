@@ -97,4 +97,17 @@ Factory pattern is a good choice to return a implementation of a interface or an
 Inner class + static
 
 **** TODO Closure & callbacks
+*** Strings
+**** + Vs. StringBuilder
+For complex string concate, you need to explicitly use StringBuilder
+#+BEGIN_SRC java
+  String s = "abc" + "def" + "ghi"; // will be translate to StringBuilder.append
+
+  String[] fields = {"abc", "def", "ghi"};
+  String res1 = "";
+  foreach(String field : fields) {
+      res1 += field;
+  } // won't be translate to StringBuilder
+#+END_SRC
+**** TODO Regular expressions
 
