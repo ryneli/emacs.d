@@ -514,7 +514,7 @@ In queue: null
 Just created: java.lang.ref.PhantomReference@5e481248
 In queue: null
 
-*** TODO I/O
+*** I/O
 **** A directory lister
 #+NAME: DirList
 #+BEGIN_SRC java :classname DirList :cmdline "DirList .*.class"
@@ -539,14 +539,17 @@ In queue: null
   }
 
 #+END_SRC
+
+#+RESULTS: DirList
+: DirList.class
+
 #+CALL: DirList[:cmdline "DirList .*.class"]()
 
 #+RESULTS:
-| DirFilter.class |
-| DirList.class   |
+: DirList.class
 
 **** Directory utilities
-#+BEGIN_SRC java :classname Directory
+#+BEGIN_SRC java :classname Directory :results raw
   import java.util.regex.*;
   import java.io.*;
   import java.util.*;
@@ -574,9 +577,385 @@ In queue: null
               files.addAll(other.files);
               dirs.addAll(other.dirs);
           }
+          public String toString() {
+              return "dirs: " + Arrays.toString(dirs.toArray()) +
+                  "\n\nfiles: " + Arrays.toString(files.toArray());
+          }
+      }
+      public static TreeInfo walk(String start, String regex) {
+          return recurseDirs(new File(start), regex);
+      }
+      public static TreeInfo walk(File start, String regex) {
+          return recurseDirs(start, regex);
+      }
+      public static TreeInfo walk(File start) {
+          return recurseDirs(start, ".*");
+      }
+      public static TreeInfo walk(String start) {
+          return recurseDirs(new File(start), ".*");
+      }
+      static TreeInfo recurseDirs(File startDir, String regex) {
+          TreeInfo result = new TreeInfo();
+          for (File item : startDir.listFiles()) {
+              if (item.isDirectory()) {
+                  result.dirs.add(item);
+                  result.addAll(recurseDirs(item, regex));
+              } else {
+                  if (item.getName().matches(regex)) {
+                      result.files.add(item);
+                  }
+              }
+          }
+          return result;
+      }
+      public static void main(String[] args) {
+          System.out.println(walk("."));
       }
   }
 #+END_SRC
+
+**** Typical uses of I/O streams
+- Read 
+#+BEGIN_SRC java :classname BufferedInputFile
+  import java.io.*;
+  public class BufferedInputFile {
+      public static String read(String filename) throws IOException {
+          // Reading input by lines
+          BufferedReader in = new BufferedReader(new FileReader(filename));
+          String s;
+          StringBuilder sb = new StringBuilder();
+          while ((s = in.readLine()) != null) {
+              sb.append(s + "\n");
+          }
+          in.close();
+          return sb.toString();
+      }
+      public static void main(String[] args) throws IOException {
+          System.out.print(read("BufferedInputFile.java"));
+      }
+  }
+#+END_SRC
+
+- Write
+#+BEGIN_SRC java :classname BasicFileOutput
+  import java.io.*;
+
+  public class BasicFileOutput {
+      static String file = "BasicFileOutput.out";
+      public static void main(String[] args) throws IOException {
+          BufferedReader in = new BufferedReader(new
+                                                 StringReader(BufferedInputFile.read("BufferedInputFile.java")));
+          PrintWriter out = new PrintWriter(file);
+          int lineCount = 1;
+          String s;
+          while ((s = in.readLine()) != null)
+              out.println(lineCount++ + ": " + s);
+          out.close();
+          System.out.println(BufferedInputFile.read(file));
+      }
+  }
+#+END_SRC
+
+- Random-access files
+#+BEGIN_SRC java :classname UsingRandomAccessFile
+  import java.io.*;
+
+  public class UsingRandomAccessFile {
+      static String file = "rtest.dat";
+      static void display() throws IOException {
+          RandomAccessFile rf = new RandomAccessFile(file, "r");
+          for (int i = 0; i < 7; i++) {
+              System.out.println("Value " + i + ": " + rf.readDouble());
+          }
+          System.out.println(rf.readUTF());
+          rf.close();
+      }
+      public static void main(String[] args) throws IOException {
+          RandomAccessFile rf = new RandomAccessFile(file, "rw");
+          for (int i = 0; i < 7; i++) {
+              rf.writeDouble(i * 1.414);
+          }
+          rf.writeUTF("The end of the file");
+          rf.close();
+          display();
+          rf = new RandomAccessFile(file, "rw");
+          rf.seek(5*8);
+          rf.writeDouble(47.0001);
+          rf.close();
+          display();
+      }
+  }
+#+END_SRC
+
 *** TODO Enumerated Types
+- multiple dispatching :: best approach is using table
+
 *** TODO Annotations
-*** TODO Concurrency
+
+*** Concurrency
+#+NAME: lift-off
+#+BEGIN_SRC java :classname LiftOff
+  class LiftOff implements Runnable {
+      protected int countDown = 10;
+      private static int taskCount = 0;
+      private final int id = taskCount++;
+      public LiftOff() {}
+      public LiftOff(int countDown) {
+          this.countDown = countDown;
+      }
+      public String status() {
+          return "#" + id + "(" +
+              (countDown > 0 ? countDown : "LiftOff!") + "), ";
+      }
+      @Override
+      public void run() {
+          while (countDown-- > 0) {
+              System.out.print(status());
+              Thread.yield();
+          }
+      }
+  }
+#+END_SRC
+
+**** Using thread
+#+BEGIN_SRC java :classname MainThread :noweb yes
+  <<lift-off>>
+  public class MainThread {
+      public static void main(String[] args) {
+          LiftOff launch = new LiftOff();
+          launch.run();
+      }
+  }
+#+END_SRC
+
+#+BEGIN_SRC java :classname BasicThreads :noweb yes
+  <<lift-off>>
+      public class BasicThreads {
+          public static void main(String[] args) {
+              for (int i = 0; i < 5; i++) {
+                  new Thread(new LiftOff()).start();
+              }
+              System.out.println("Waiting for LiftOff");
+          }
+      }
+#+END_SRC
+
+#+RESULTS:
+| #1(9) | #0(9) | #1(8) | #0(8) | #1(7) | #0(7) | #1(6) | #0(6)        | #1(5) | #0(5) | #1(4) | #0(4) | #1(3) | #0(3) | #2(9) | #1(2) | #2(8) | #1(1)        | #0(2) | #1(LiftOff!) | #2(7) | #0(1) | #2(6) | #0(LiftOff!) | #2(5) | #2(4) | #2(3) | #2(2) | #2(1) | #2(LiftOff!) | #3(9) | #3(8) | Waiting for LiftOff |
+| #3(7) | #3(6) | #3(5) | #3(4) | #3(3) | #3(2) | #3(1) | #3(LiftOff!) | #4(9) | #4(8) | #4(7) | #4(6) | #4(5) | #4(4) | #4(3) | #4(2) | #4(1) | #4(LiftOff!) |       |              |       |       |       |              |       |       |       |       |       |              |       |       |                     |
+
+**** Using executor
+#+BEGIN_SRC java :classname CachedThreadPool :noweb yes
+  import java.util.concurrent.*;
+  <<lift-off>>
+  public class CachedThreadPool {
+      public static void main(String[] args) {
+          // ExecutorService exec = Executors.newCachedThreadPool();
+          ExecutorService exec = Executors.newSingleThreadExecutor();
+          for (int i = 0; i < 5; i++) {
+              exec.execute(new LiftOff());
+          }
+          exec.shutdown();
+      }
+  }
+#+END_SRC
+
+#+RESULTS:
+| #0(9) | #0(8) | #0(7) | #0(6) | #0(5) | #0(4) | #0(3) | #0(2) | #0(1) | #0(LiftOff!) | #1(9) | #1(8) | #1(7) | #1(6) | #1(5) | #1(4) | #1(3) | #1(2) | #1(1) | #1(LiftOff!) | #2(9) | #2(8) | #2(7) | #2(6) | #2(5) | #2(4) | #2(3) | #2(2) | #2(1) | #2(LiftOff!) | #3(9) | #3(8) | #3(7) | #3(6) | #3(5) | #3(4) | #3(3) | #3(2) | #3(1) | #3(LiftOff!) | #4(9) | #4(8) | #4(7) | #4(6) | #4(5) | #4(4) | #4(3) | #4(2) | #4(1) | #4(LiftOff!) |
+
+**** Producing return values from tasks
+#+BEGIN_SRC java :classname CallableDemo
+  import java.util.concurrent.*;
+  import java.util.*;
+
+  class TaskWithResult implements Callable<String> {
+      private int id;
+      public TaskWithResult(int id) {
+          this.id = id;
+      }
+      public String call() {
+          return "result of TaskWithResult " + id;
+      }
+  }
+
+  public class CallableDemo {
+      public static void main(String[] args) {
+          ExecutorService exec = Executors.newCachedThreadPool();
+          ArrayList<Future<String>> results =
+              new ArrayList<Future<String>>();
+          for (int i = 0; i < 10; i++) {
+              results.add(exec.submit(new TaskWithResult(i)));
+          }
+          for (Future<String> fs : results) {
+              try {
+                  // get() blocks until completion
+                  System.out.println(fs.get());
+              } catch (InterruptedException e) {
+                  System.out.println(e);
+                  return;
+              } catch (ExecutionException e) {
+                  System.out.println(e);
+              } finally {
+                  exec.shutdown();
+              }
+          }
+      }
+  }
+#+END_SRC
+
+#+RESULTS:
+| result | of | TaskWithResult | 0 |
+| result | of | TaskWithResult | 1 |
+| result | of | TaskWithResult | 2 |
+| result | of | TaskWithResult | 3 |
+| result | of | TaskWithResult | 4 |
+| result | of | TaskWithResult | 5 |
+| result | of | TaskWithResult | 6 |
+| result | of | TaskWithResult | 7 |
+| result | of | TaskWithResult | 8 |
+| result | of | TaskWithResult | 9 |
+
+**** Daemon threads
+#+BEGIN_SRC java :classname SimpleDaemons
+  import java.util.concurrent.*;
+
+  public class SimpleDaemons implements Runnable {
+      public void run() {
+          try {
+              while (true) {
+                  TimeUnit.MILLISECONDS.sleep(100);
+                  System.out.println(Thread.currentThread() + " " + this);
+              }
+          } catch(InterruptedException e) {
+              System.out.println("sleep() interrupted");
+          }
+      }
+      public static void main(String[] args) throws Exception {
+          for (int i = 0; i < 10; i++) {
+              Thread daemon = new Thread(new SimpleDaemons());
+              daemon.setDaemon(true);
+              daemon.start();
+          }
+          System.out.println("Add daemons started");
+          TimeUnit.MILLISECONDS.sleep(175);
+      }
+  }
+#+END_SRC
+
+- The daemons are terminated *abruptly* when the last of the non-daemons terminates.
+#+BEGIN_SRC java :classname DaemonDontRunFinally
+  import java.util.concurrent.*;
+
+  class ADaemon implements Runnable {
+      public void run() {
+          try {
+              System.out.println("Start ADaemon");
+              TimeUnit.SECONDS.sleep(1);
+          } catch(InterruptedException e) {
+              System.out.println("Exiting via InterruptedException");
+          } finally {
+              System.out.println("This should always run?");
+          }
+      }
+  }
+
+  public class DaemonDontRunFinally {
+      public static void main(String[] args) throws Exception {
+          Thread t = new Thread(new ADaemon());
+          t.setDaemon(true);
+          t.start();
+      }
+  }
+#+END_SRC
+
+
+**** Synchronizing on other objects
+#+BEGIN_SRC java :classname DualSync
+  public class DualSync {
+      private Object syncObject = new Object();
+      public synchronized void f() {
+          for (int i = 0; i < 5; i++) {
+              System.out.println("f()");
+              Thread.yield();
+          }
+      }
+      public void g() {
+          synchronized(syncObject) {
+              for (int i = 0; i < 5; i++) {
+                  System.out.println("g()");
+                  Thread.yield();
+              }
+          }
+      }
+      public static void main(String[] args) {
+          final DualSync ds = new DualSync();
+          new Thread() {
+              public void run() {
+                  ds.f();
+              }
+          }.start();
+          ds.g();
+      }
+  }
+#+END_SRC
+
+#+RESULTS:
+| g() |
+| g() |
+| g() |
+| g() |
+| g() |
+| f() |
+| f() |
+| f() |
+| f() |
+| f() |
+
+**** Thread local storage
+#+BEGIN_SRC java :classname ThreadLocalVariableHolder
+  import java.util.concurrent.*;
+  import java.util.*;
+
+  class Accessor implements Runnable {
+      private final int id;
+      public Accessor(int idn) { id = idn; }
+      public void run() {
+          while(!Thread.currentThread().isInterrupted()) {
+              ThreadLocalVariableHolder.increment();
+              System.out.println(this);
+              Thread.yield();
+          }
+      }
+      public String toString() {
+          return "#" + id + ": " + ThreadLocalVariableHolder.get();
+      }
+  }
+
+  public class ThreadLocalVariableHolder {
+      private static ThreadLocal<Integer> value =
+          new ThreadLocal<Integer>() {
+              private Random rand = new Random(47);
+              protected synchronized Integer initialValue() {
+                  return rand.nextInt(10000);
+              }
+          };
+      public static void increment() {
+          value.set(value.get() + 1);
+      }
+      public static int get() {
+          return value.get();
+      }
+      public static void main(String[] args) throws Exception {
+          ExecutorService exec = Executors.newCachedThreadPool();
+          for (int i = 0; i < 5; i++) {
+              exec.execute(new Accessor(i));
+          }
+          TimeUnit.SECONDS.sleep(3);
+          exec.shutdownNow();
+      }
+  }
+#+END_SRC
+
+
+
+

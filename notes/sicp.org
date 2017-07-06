@@ -1,0 +1,8 @@
+** Building Abstractions with Procedures
+*** The elements of programming
+- Ways provided by programming language to combine simple ideas into complex one
+  - primitive expressions
+  - means of combination
+  - means of abstraction
+- expressions
+- Naming and the Environment
