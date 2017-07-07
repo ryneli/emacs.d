@@ -444,6 +444,12 @@ Copy from [[https://github.com/sandhu/emacs.d/tree/master/config][Sandhu's githu
   (use-package groovy-mode
     :ensure t)
 #+END_SRC
+*** scheme
+#+BEGIN_SRC emacs-lisp :tangle yes
+  ;; turn on highlight matching brackets when cursor is on one
+  (show-paren-mode 1)
+  (setq show-paren-style 'expression)
+#+END_SRC
 ** Shortcut
 #+BEGIN_SRC emacs-lisp :tangle yes
   (global-set-key (kbd "C-x r") 'helm-imenu)

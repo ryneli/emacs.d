@@ -6,3 +6,6 @@
   - means of abstraction
 - expressions
 - Naming and the Environment
+*** Exercise 1.6
+Applicative-order evaluation vs. normal-order evaluation.
+function *new-if* use applicative-order, so it will cause maximum recursion depth exceeded, like 1.5.
