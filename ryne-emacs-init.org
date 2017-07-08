@@ -11,6 +11,7 @@
 - sudo apt install git
 - sudo apt install ditaa
 - sudo apt install graphviz
+- sudo apt install guile-2.0
 *** start as daemon
 1. add `emacs --daemon` in .bashrc or .zshrc
 2. bind `Ctrl Alt z` to command `emacsclient -c`
@@ -229,6 +230,7 @@
      (sh . t)
      (java . t)
      (C . t)
+     (scheme . t)
      (plantuml . t)))
   ;; set ditaa jar path
   (setq org-ditaa-jar-path "/usr/share/ditaa/ditaa.jar")
@@ -449,6 +451,20 @@ Copy from [[https://github.com/sandhu/emacs.d/tree/master/config][Sandhu's githu
   ;; turn on highlight matching brackets when cursor is on one
   (show-paren-mode 1)
   (setq show-paren-style 'expression)
+  ;; setup paredit
+  (use-package paredit
+    :ensure t
+    :init
+    (dolist (hook '(emacs-lisp-mode-hook lisp-mode-hook geiser-mode-hook
+                                         clojure-mode-hook))
+      (add-hook hook 'paredit-mode))
+    :diminish paredit-mode)
+  (use-package geiser
+    :ensure t
+    :init
+    (setq geiser-active-implementations '(guile))
+    :config
+    (add-hook 'scheme-mode-hook 'geiser-mode))
 #+END_SRC
 ** Shortcut
 #+BEGIN_SRC emacs-lisp :tangle yes
