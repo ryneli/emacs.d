@@ -462,9 +462,10 @@ Copy from [[https://github.com/sandhu/emacs.d/tree/master/config][Sandhu's githu
   (use-package geiser
     :ensure t
     :init
-    (setq geiser-active-implementations '(guile))
+    (setq geiser-active-implementations '(mit))
     :config
     (add-hook 'scheme-mode-hook 'geiser-mode))
+
 #+END_SRC
 ** Shortcut
 #+BEGIN_SRC emacs-lisp :tangle yes

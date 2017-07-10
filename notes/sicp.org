@@ -120,4 +120,132 @@ The first procedure is recursive; the second procedure is iterative.
 #+RESULTS:
 : 61354575194
 
-*** Exercise 1.12
+*** TODO Exercise 1.12
+
+*** TODO Exercise 1.13
+
+*** TODO 1.14
+
+*** 1.15
+#+BEGIN_SRC scheme :results both
+  (define (cube x) (* x x x))
+  (define (p x) (- (* 3 x) (* 4 (cube x))))
+  (define (sine angle)
+    (if (not (> (abs angle) 0.1))
+        angle
+        (p (sine (/ angle 3.0)))))
+  (sine 12.15)
+
+  (define (count x c)
+    (if (not (> x 0.1))
+        c
+        (count (/ x 3.0) (+ c 1))))
+  (count 12.15 0)
+#+END_SRC
+
+#+RESULTS:
+: 5
+
+- a: 5
+- b: a^{1/3}
+
+*** 1.16
+#+BEGIN_SRC scheme :results both
+  (define (even? a)
+    (= (remainder a 2) 0))
+  (define (fast-expt-iter b n a)
+    (cond ((= n 0) a)
+          ((even? n) (fast-expt-iter (* b b) (/ n 2) a))
+          (else (fast-expt-iter (* b b) (/ (- n 1) 2) (* a b)))))
+  (define (fast-expt b n)
+    (fast-expt-iter b n 1))
+  (fast-expt 2 25)
+#+END_SRC
+
+#+RESULTS:
+: 33554432
+
+*** TODO 1.17
+
+*** TODO 1.18
+
+*** 1.19
+Never thought Fibonacci could be calculated in this way.
+#+BEGIN_SRC scheme :results both
+  (define (even? n) (= (remainder n 2) 0))
+  (define (square a) (* a a))
+  (define (fib-iter a b p q count)
+    (cond ((= count 0) b)
+          ((even? count)
+           (fib-iter a
+                     b
+                     (+ (square p) (square q))
+                     (+ (square q) (* 2 p q))
+                     (/ count 2)))
+          (else (fib-iter (+ (* b q) (* a q) (* a p))
+                          (+ (* b p) (* a q))
+                          p
+                          q
+                          (- count 1)))))
+  (define (fib n)
+    (fib-iter 1 0 0 1 n))
+  (fib 50)
+#+END_SRC
+
+#+RESULTS:
+: 12586269025
+
+*** 1.20
+- Applicative order :: 4
+- Normal order :: 18
+#+BEGIN_SRC scheme :results both
+  (define (gcd a b cnt)
+    (if (= b 0)
+        cnt
+        (gcd b (remainder a b) (+ cnt 1))))
+  (gcd 206 40 0)
+#+END_SRC
+
+#+RESULTS:
+
+*** 1.21
+#+NAME: prime
+#+BEGIN_SRC scheme
+  (define (find-divisor n test-divisor)
+    (if (= (remainder n test-divisor) 0)
+        test-divisor
+        (find-divisor n (+ test-divisor 1))))
+
+  (define (smallest-divisor n)
+    (find-divisor n 2))
+
+  (define (prime? n)
+    (= (smallest-divisor n) n))
+
+  (list
+   (smallest-divisor 199)
+   (smallest-divisor 1999)
+   (smallest-divisor 19999))
+  ;; (prime? 199)
+#+END_SRC
+
+#+RESULTS: prime
+: An error occurred.
+
+*** 1.22
+#+BEGIN_SRC scheme :noweb yes
+  <<prime>>
+  (define (start-prime-test n start-time)
+    (if (prime? n)
+        (report-prime (- (runtime) start-time))))
+
+  (define (report-prime elapsed-time)
+    (display " *** ")
+    (display elapsed-time))
+
+  (smallest-divisor 199)
+#+END_SRC
+
+#+RESULTS:
+: 199
+
