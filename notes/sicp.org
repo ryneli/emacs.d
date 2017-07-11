@@ -249,3 +249,11 @@ Never thought Fibonacci could be calculated in this way.
 #+RESULTS:
 : 199
 
+*** 1.25
+(fast-expt base exp) is easy to overflow
+
+*** 1.26
+duplicated computation
+
+*** 1.27
+
