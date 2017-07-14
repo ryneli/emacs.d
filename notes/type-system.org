@@ -1,0 +1,6 @@
+*** Definitions
+- Trapped error :: the execution errors that cause the computation to stop immediately
+- Forbidden errors :: all the untrapped errors, and part of the trapped errors
+- Safe language :: Languages where all program fragments are *safe*. Safe means not cause untrapped errors.
+- Typed language :: languages where variables can be given (nontrivial) types
+- Explicitly typed language :: types are part of the syntax
