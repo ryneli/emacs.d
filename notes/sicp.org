@@ -255,5 +255,21 @@ Never thought Fibonacci could be calculated in this way.
 *** 1.26
 duplicated computation
 
-*** 1.27
+*** TODO 1.27
+
+*** TODO 1.28
+#+BEGIN_SRC scheme
+  (define (simpson f a b n)
+    (define (fn x) (cond (((= x 0) 1)
+                          ((= x n) 1)
+                          ((= (remainder x 2) 0) 2)
+                          ((= (remainder x 2) 1) 4))))
+    (fn a))
+
+  ;;; (simpson (lambda (x) (* x x x)) 0 1 4)
+  (cond (else 1))
+#+END_SRC
+
+#+RESULTS:
+: An error occurred.
 

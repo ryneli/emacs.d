@@ -1,6 +1,17 @@
 *** Definitions
 - Trapped error :: the execution errors that cause the computation to stop immediately
+| Trapped error              | Untrapped error              |
+|----------------------------+------------------------------|
+| Divide-by-zero             | Buffer overflow in C         |
+| array out of bound in Java | Jumping to the wrong address |
 - Forbidden errors :: all the untrapped errors, and part of the trapped errors
-- Safe language :: Languages where all program fragments are *safe*. Safe means not cause untrapped errors.
-- Typed language :: languages where variables can be given (nontrivial) types
+- Type safety :: The property stating that programs do not cause untrapped errors
+- Type soundness :: The property stating that programs do not cause forbidden errors
 - Explicitly typed language :: types are part of the syntax
+- Strong typed language :: guarantee all programs are well-behaved
+| Type property               | Example language      |
+|-----------------------------+-----------------------|
+| untyped                     | assembly              |
+| weakly, statically typed    | C, C++ (pointer cast) |
+| Strongly, statically typed  | Java, C#              |
+| Strongly, dynamically typed | Python, Scheme        |
