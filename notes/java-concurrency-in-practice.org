@@ -1,0 +1,88 @@
+** Introduction
+*** Risks of thread
+- Safety hazards
+- Liveness hazards
+- Performance hazards
+
+** Thread Safety
+*** How to make sure thread safety
+- Don't share the state variable across threads
+- Make the state variable immutable
+- Use synchronization whenever accessing the state variable
+
+** Sharing Objects
+*** Mutual exclusion & memory visibility
+Locking is not just about mutual exclusion; it is also about memory visibility. To ensure that all threads see the most up-to-date values of shared mutable variables, the reading and writing threads must synchronize on a common lock.
+
+*** Volatile
+Volatile is only ensure the visibility.
+
+*** Publishing and escape
+- Publishing :: Making an object available outside its scope.
+- Escape :: Publishing an object when you shouldn't
+#+NAME: example-of-this-reference-escape-in-constructor
+#+BEGIN_SRC java
+  public class ThisEscape {
+      public ThisEscape(EventSource source) {
+          source.registerListener((event) -> doSomething(event));
+      }
+  }
+#+END_SRC
+
+#+NAME: fix
+#+BEGIN_SRC java
+  public class SafeListener {
+      private final EventListener listener;
+      private SafeListener() {
+          listener = (event) -> doSometing(event);
+      }
+      public static SafeListener newInstance(EventSource source) {
+          SafeListener safe = new SafeListener();
+          source.registerListener(safe.listener);
+          return safe;
+      }
+  }
+#+END_SRC
+
+*** Thread confinement
+- Ad-hoc thread confinement :: such as android UI thread, there is only one UI thread for each process to handle UI-related object, such as activity.
+- Stack confinement
+- ThreadLocal
+
+*** Safe publication
+To publish an object safely, both the reference to the object and the object's state must be made visible to other threads at the same time.
+- Initializing an object from a static initializer
+- Storing a reference to it into a volatile field or AtomicReference
+- Storing a reference to it into a final field of a properly constructed object
+- storing a reference to it into a field that is properly guarded by a lock
+*** Different type of object in case of multithreading
+- Thread-confined
+- Shared read-only
+- Shared thread-safe
+- Guarded
+
+** Composing Objects
+*** Gathering synchronization requirements
+- object states
+- state space
+- state transition :: single variable changes from one state to the next state
+- state relations :: state relations of multiple variables
+
+*** Choose lock policy
+- volatile
+- intrinic lock
+- immutable
+- confined by thread
+- atomic operations
+- ...
+
+** Building Blocks
+*** ConcurrentMap
+Better performance then synchronizedMap, weaken consistency
+*** CopyOnWriteArrayList
+Create a new list when modifying the list
+Suitable for listeners' list
+
+*** BlockingQueue and BlockingDeque
+BlockingQueue is suitable for producer-consumer pattern
+BlockingDeque is suitable for consumers to steal work from other consumers
