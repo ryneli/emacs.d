@@ -11,14 +11,22 @@
 - sudo apt install git
 - sudo apt install ditaa
 - sudo apt install graphviz
-- sudo apt install guile-2.0
+
 *** start as daemon
 1. add `emacs --daemon` in .bashrc or .zshrc
 2. bind `Ctrl Alt z` to command `emacsclient -c`
 ** General configuration
+*** common functions
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun lzq-info (str)
+    "log STR into *message* buffer"
+    (message (concat "LAUNCH-STEP: " str)))
+#+END_SRC
+
 *** Save current session
 #+BEGIN_SRC emacs-lisp :tangle yes
-(desktop-save-mode 1)
+  (lzq-info "(desktop-save-mode 1)")
+  (desktop-save-mode 1)
 #+END_SRC
 
 
@@ -27,21 +35,20 @@
   (require 'package)
   (add-to-list 'package-archives '("melpa" .  "http://melpa.org/packages/") 'APPEND)
   (add-to-list 'package-archives '("melpa-stable" . "http://stable.melpa.org/packages/") t)
-  (package-initialize)
-  (package-refresh-contents)
   (unless (package-installed-p 'use-package)
-  (package-refresh-contents)
-  (package-install 'use-package))
+    (lzq-info "install use-package")
+    (package-refresh-contents)
+    (package-install 'use-package))
 
   (eval-when-compile
     (require 'use-package))
   (require 'bind-key)
-
 #+END_SRC
 
 
 ** Personal information
 #+BEGIN_SRC emacs-lisp :tangle yes
+  (lzq-info "setup personal info")
   (setq user-full-name "Zhenqiang Li"
         user-email-address "lizhenqiangsnake@gmail.com")
 #+END_SRC
@@ -77,11 +84,6 @@
     :ensure t)
 #+END_SRC
 
-*** TODO git-gutter
-#+BEGIN_SRC emacs-lisp :tangle yes
-
-#+END_SRC
-
 
 ** Fuzzy search anything
 - helm-locate :: find files
@@ -107,9 +109,6 @@
 #+END_SRC
 
 **** helm-gtags
-- helm-gtags-find-tag-from-here
-- helm-gtags-show-stack
-- helm-gtags-pop-stack
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package helm-gtags
     :ensure t)
@@ -403,22 +402,24 @@ Copy from [[https://github.com/sandhu/emacs.d/tree/master/config][Sandhu's githu
 #+END_SRC
 ** Shortcut
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (global-set-key (kbd "C-x r") 'helm-imenu)
-  (global-set-key (kbd "C-x d") 'helm-gtags-find-tag-from-here)
-  (global-set-key (kbd "C-x p f") 'projectile-find-file)
+  (global-set-key (kbd "C-c C-i") 'ido-imenu)
   (global-set-key (kbd "C-c h") 'helm-mini)
   (global-set-key (kbd "C-h a") 'helm-apropos)
-  (global-set-key (kbd "C-x C-b") 'helm-buffers-list)
   (global-set-key (kbd "C-x b") 'helm-buffers-list)
-  (global-set-key (kbd "M-y") 'helm-show-kill-ring)
-  (global-set-key (kbd "M-x") 'helm-M-x)
+  (global-set-key (kbd "C-x g d") 'helm-gtags-find-tag-from-here)
+  (global-set-key (kbd "C-x g p") 'helm-gtags-pop-stack)
+  (global-set-key (kbd "C-x g s") 'helm-gtags-show-stack)
+  (global-set-key (kbd "C-x p f") 'projectile-find-file)
+  (global-set-key (kbd "C-x r") 'helm-imenu)
+  (global-set-key (kbd "C-x C-b") 'helm-buffers-list)
   (global-set-key (kbd "C-x c o") 'helm-occur)
   (global-set-key (kbd "C-x c s") 'helm-swoop)
   (global-set-key (kbd "C-x c y") 'helm-yas-complete)
   (global-set-key (kbd "C-x c Y") 'helm-yas-create-snippet-on-region)
   (global-set-key (kbd "C-x c b") 'my/helm-do-grep-book-notes)
   (global-set-key (kbd "C-x c SPC") 'helm-all-mark-rings)
-  (global-set-key (kbd "M-x") 'smex)
   (global-set-key (kbd "C-x C-m") 'smex)
-  (global-set-key (kbd "C-c C-i") 'ido-imenu)
+  (global-set-key (kbd "M-x") 'helm-M-x)
+  (global-set-key (kbd "M-y") 'helm-show-kill-ring)
+
 #+END_SRC
