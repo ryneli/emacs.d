@@ -1,0 +1,12 @@
+#+TITLE: How to assign more cpu time to current activity
+
+* Background
+The launching time of apps on android wear is unacceptable slow and unstable. One promising solution is to assign more CPU time to current activity. Android has acquire CGroup feature from linux, which makes it possible to category processes into different group and assign a fixed portion of CPU time to each category.
+
+* CGroups
+[[https://source.codeaurora.org/external/gigabyte/qrd-gb-ssss-7225/plain/android/kernel/Documentation/cgroups/cgroups.txt?id=e34c19e51778b1f44682192040db577967da636b][Here]] is the introduction of CGroups. Basically, you need to mount =/dev/cgroup/=. Then you can create new cgroup as a dir under =/dev/cgroup/= and do configuration for the group in this new dir, including add new processes into this new group.
+
+
+The configuration of CGroup for android is in =system/core/rootdir/init.rc=.
+** CGroups in android
+- process category :: top-apps, foreground, background, system-background
