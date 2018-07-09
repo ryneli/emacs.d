@@ -1,0 +1,54 @@
+#+TITLE: How does android start in android
+* Main roles in the process
+- ActivityManagerService :: (AMS), lives in server side, be responsible for the whole activity lifecycle.
+- ActivityThread :: The real entrypoint of an app. It is the so-called UI thread.
+- ApplicationThread :: AMS => ApplicationThread => ActivityThread
+- ApplicationThreadProxy :: AMS => ApplicationThreadProxy => ApplicationThread
+- Instrumentation :: Mapping to one application, is responsible for the operations on an activity
+- ActivityStack :: the stack of activity in AMS
+- ActivityRecord :: the representative of an activity in the ActivityStack
+- TaskRecord :: Used to keep the order of starting and exiting an activity *Not clear*
+
+- ActivityStarter :: Turning intent and flags into activity and associated task and stack.
+
+* startActivityForResult breakdown (communication between ActivityThread and AMS)
+   Activity.startActivityForResult()
+=> Instrumentation.exeStartActivity()
+=> ServiceManager.getService(Context.ACTIVITY_SERVICE).startActivity()
+... Binder Driver does some magic here ...
+=> ActivityManagerService.startActivity()
+=> ActivityStarter.startActivityMayWait() *Perhaps there is lock in this method*
+=> ActivityStarter.startActivityLocked()
+=> ActivityStarter.startActivity()
+=> ActivityStarter.startActivityUnchecked()
+=> ActivityStack.startActivityLocked()
+=> ActivityStackSupervisor.resumeFocusedStackTopActivityLocked()
+=> ActivityStack.resumeTopActivityUncheckedLocked()
+=> ActivityStack.resumeTopActivityInnerLocked()
+=> ActivityStackSupervisor.pauseBackStacks()
+=> ActivityStack.startPausingLocked()
+=> IApplicationThread.schedulePauseActivity()
+... Binder Driver does some magic here ...
+=> ActivityThread.ApplicationThread.schedulePauseActivity()
+=> ActivityThread.handlePauseActivity()
+=> Instrumentation.callActivityOnPause()
+
+When starting activity via ADB, am.java will start a similar process.
+
+* from the perspective of systrace
+http://riteattitude.blogspot.com/2011/11/android-zygote-and-processes.html
+** ZygoteInit - init new process after forking
+1. gcAndFinalize()
+
+** ActivityThreadMain
+1. create main Looper
+1. create a new ActivityThread
+1. attach ActivityThread to AMS, *AMS will get the app info from pid, not sure how the app info is set*
+  - init Adj
+  ...
+** bindApplication - ActivityThread.bindApplication
+1. register the UI thread as a sensitive thread to the runtime. *Do not do heavy work before this point*
+1. setup http proxies
+1. ApplicationLoaders.getClassLoader()
+1. setupGraphicsSupport *setup a location for graphics code*
+1. LoadedApk.makeApplication *call ApplicationLoaders.getClassLoader*
