@@ -188,6 +188,10 @@
 
 #+END_SRC
 
+*** org agenda
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (setq org-agenda-files '("~/.dailylife"))
+#+END_SRC
 
 *** use plantuml for UML
 #+BEGIN_SRC emacs-lisp :tangle yes
