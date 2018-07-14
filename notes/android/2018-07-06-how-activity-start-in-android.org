@@ -1,4 +1,4 @@
-#+TITLE: How does android start in android
+#+TITLE: How does activity start in android
 * Main roles in the process
 - ActivityManagerService :: (AMS), lives in server side, be responsible for the whole activity lifecycle.
 - ActivityThread :: The real entrypoint of an app. It is the so-called UI thread.
@@ -49,6 +49,6 @@ http://riteattitude.blogspot.com/2011/11/android-zygote-and-processes.html
 ** bindApplication - ActivityThread.bindApplication
 1. register the UI thread as a sensitive thread to the runtime. *Do not do heavy work before this point*
 1. setup http proxies
-1. ApplicationLoaders.getClassLoader()
+1. ApplicationLoaders.getClassLoader() *#AI, Is this the place for VerifyClass tag in systrace?*
 1. setupGraphicsSupport *setup a location for graphics code*
 1. LoadedApk.makeApplication *call ApplicationLoaders.getClassLoader*

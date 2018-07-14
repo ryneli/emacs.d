@@ -1,0 +1,18 @@
+#+TITLE: How does application start in android
+* Perspective of systrace
+** ActivityThreadMain
+- AMS#attachApplication
+- if Runtime used mem > 3/4 of total, trigger memory trim
+
+** bindApplication
+- AMS#attachApplicationLocked
+  - ApplicationThread#bindApplication
+  - ActivityStackSupervisor#realStartActivityLocked
+    - clientTransaction.addCallback(LaunchActivityItem...) *contains #activityStart*
+  - start services
+
+** activityStart
+ActivityThread#attach()
+... binder driver ...
+AMS#attachApplication
+AMS#activityStart
