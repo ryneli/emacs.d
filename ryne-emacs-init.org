@@ -178,6 +178,7 @@
     '("latexmk -pdflatex='pdflatex -interaction nonstopmode' -pdf -bibtex -f %f"))
 #+END_SRC
 *** org theme
+https://lepisma.github.io/2017/10/28/ricing-org-mode/
 #+BEGIN_SRC emacs-lisp :tangle yes
   (setq org-startup-indented t
         org-bullets-bullet-list '(" ") ;; no bullets, needs org-bullets package
