@@ -1,0 +1,71 @@
+*** Sell house profit
+#+BEGIN_SRC python :results output
+  import matplotlib.pyplot as plt
+  import numpy as np
+
+  mortgage_rate = 0.04625 / 12
+  mortgage_base = 543200.0
+  pay_per_month = 2792.81
+  buy_price = 679000
+  down_payment = buy_price - mortgage_base
+
+  maintenance = 15000
+  sell_price = 760000
+  hold_month = 24
+  compension_mortgage_rate = 0.06
+
+  total = 0
+  current_month = 0
+  mortgage_base_array = []
+  principle_array = []
+  interest_array = []
+  while mortgage_base > 0 and current_month < 400:
+      old_mortgage_base = mortgage_base
+      mortgage_base = mortgage_base * (1 + mortgage_rate) - pay_per_month
+      principle = old_mortgage_base - mortgage_base
+      interest = pay_per_month - principle
+      mortgage_base_array += [mortgage_base]
+      principle_array += [principle]
+      interest_array += [interest]
+      current_month += 1
+  plt.plot(range(0, current_month), principle_array, range(0, current_month), interest_array)
+  # plt.show()
+  hold_month = min(hold_month, current_month)
+  profit = sell_price * (1 - compension_mortgage_rate) - maintenance - buy_price - sum(interest_array[:hold_month-1])
+
+  print "Buy price : %d; Sell price : %d; Pay month %3d" % (buy_price, sell_price, current_month)
+  print "Total profit : %.2d; Per-month profit : %.2d; Hold month : %3d" % (profit, profit / hold_month, hold_month)
+  for i in range(hold_month):
+      print "Month %3d, pay principle %4d, pay interest %4d" % (i+1, principle_array[i], interest_array[i])
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+Buy price : 679000; Sell price : 760000; Pay month 360
+Total profit : -27051; Per-month profit : -1127; Hold month :  24
+Month   1, pay principle  699, pay interest 2093
+Month   2, pay principle  701, pay interest 2090
+Month   3, pay principle  704, pay interest 2088
+Month   4, pay principle  707, pay interest 2085
+Month   5, pay principle  710, pay interest 2082
+Month   6, pay principle  712, pay interest 2080
+Month   7, pay principle  715, pay interest 2077
+Month   8, pay principle  718, pay interest 2074
+Month   9, pay principle  721, pay interest 2071
+Month  10, pay principle  723, pay interest 2068
+Month  11, pay principle  726, pay interest 2066
+Month  12, pay principle  729, pay interest 2063
+Month  13, pay principle  732, pay interest 2060
+Month  14, pay principle  735, pay interest 2057
+Month  15, pay principle  737, pay interest 2054
+Month  16, pay principle  740, pay interest 2052
+Month  17, pay principle  743, pay interest 2049
+Month  18, pay principle  746, pay interest 2046
+Month  19, pay principle  749, pay interest 2043
+Month  20, pay principle  752, pay interest 2040
+Month  21, pay principle  755, pay interest 2037
+Month  22, pay principle  758, pay interest 2034
+Month  23, pay principle  760, pay interest 2031
+Month  24, pay principle  763, pay interest 2028
+#+end_example
+
