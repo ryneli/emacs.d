@@ -41,6 +41,9 @@
     (add-to-list 'package-archives '("org" . "https://orgmode.org/elpa/") t))
   (unless (package-installed-p 'use-package)
     (lzq-info "install use-package")
+    ;; error: Package `use-package-' is unavailable
+    ;; https://emacs.stackexchange.com/questions/39250/error-package-use-package-is-unavailable
+    (package-refresh-contents)
     (package-install 'use-package))
 
   (eval-when-compile
@@ -77,33 +80,38 @@
     :disabled
     :defer t)
 #+END_SRC
-
-*** imenu-anywhere
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package imenu-anywhere)
-#+END_SRC
 *** magit
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package magit
     :ensure t)
 #+END_SRC
 
-*** projectile-mode
-#+begin_src emacs-lisp :tangle yes
-  (use-package projectile
-    :ensure t
-    :diminish projectile-mode
-    :config
-    (progn
-      (setq projectile-keymap-prefix (kbd "C-c p"))
-      (setq projectile-completion-system 'default)
-      (setq projectile-enable-caching t)
-      (setq projectile-require-project-root nil)
-      (setq projectile-indexing-method 'alien)
-      (add-to-list 'projectile-globally-ignored-files "node-modules"))
-    :config
-    (projectile-global-mode))
-#+end_src
+*** ivy related
+#+BEGIN_SRC emacs-lisp :tangle yes
+;; ivy
+(use-package ivy
+  :ensure t
+  :diminish ivy-mode
+  :config
+  (ivy-mode 1)
+  (bind-key "C-c C-r" 'ivy-resume))
+
+;; projectile
+(use-package projectile
+  :ensure t
+  :config
+  (projectile-global-mode)
+  (setq projectile-mode-line
+        '(:eval (format " [%s]" (projectile-project-name))))
+  (setq projectile-remember-window-configs t)
+  (setq projectile-completion-system 'ivy))
+
+#+END_SRC
+
+*** ivy-imenu-anywhere
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package ivy-imenu-anywhere)
+#+END_SRC
 *** use plantuml for UML
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package plantuml-mode
@@ -178,20 +186,13 @@
     '("latexmk -pdflatex='pdflatex -interaction nonstopmode' -pdf -bibtex -f %f"))
 #+END_SRC
 *** org theme
+**** cool theme, need to learn how to set correctly
 https://lepisma.github.io/2017/10/28/ricing-org-mode/
+
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (setq org-startup-indented t
-        org-bullets-bullet-list '(" ") ;; no bullets, needs org-bullets package
-        org-ellipsis "  " ;; folding symbol
-        org-pretty-entities t
-        org-hide-emphasis-markers t
-        ;; show actually italicized text instead of /italicized text/
-        org-agenda-block-separator ""
-        org-fontify-whole-heading-line t
-        org-fontify-done-headline t
-        org-fontify-quote-and-verse-blocks t)
-#+END_SRC
+  
 *** org agenda
+
 #+BEGIN_SRC emacs-lisp :tangle yes
   (setq org-agenda-files '("~/.dailylife"))
 #+END_SRC

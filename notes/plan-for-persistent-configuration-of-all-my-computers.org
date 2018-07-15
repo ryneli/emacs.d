@@ -1,0 +1,12 @@
+* Requirements
+- use emacs for basic editing, task management, code reading
+- Android Studio for android app development
+- differential settings for work and for home
+- use i3 tiling window management
+
+* Plans
+- All configurations should live in the same repository
+- Work notes should live in x20
+- My own notes could live in BitBucket private respository
+- Exporting blogs lives in github.io
+- only support ubuntu for now, maybe also works for other Linux
