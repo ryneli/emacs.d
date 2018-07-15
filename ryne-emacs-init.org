@@ -240,7 +240,7 @@ http://bnbeckwith.com/bnb-emacs/
    '((dot . t)
      (python . t)
      (ditaa . t)
-     (sh . t)
+     (shell . t)
      (java . t)
      (C . t)
      (scheme . t)
