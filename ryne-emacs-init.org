@@ -214,6 +214,16 @@ http://bnbeckwith.com/bnb-emacs/
       (powerline-default-theme)))
 
 #+END_SRC
+*** server
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package server
+    :config
+    (progn
+      (defun server-enable ()
+	(unless (server-running-p)
+	  (server-start)))
+      (add-hook 'after-init-hook 'server-enable t)))
+#+END_SRC
 ** TODO Customize color theme
 *** Keyword Highlights
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -288,6 +298,13 @@ https://lepisma.github.io/2017/10/28/ricing-org-mode/
     :ensure t)
 #+END_SRC
 
+*** org-bulletin
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package org-bullets
+    :ensure t
+    :commands (org-bullets-mode)
+    :init (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+#+END_SRC
 ** Languages specific
 *** python
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -339,4 +356,14 @@ https://lepisma.github.io/2017/10/28/ricing-org-mode/
               "#+LaTeX_HEADER: \\usepackage[backend=bibtex,sorting=none]{biblatex}\n"
               "#+LaTeX_HEADER: \\addbibresource{~/.emacs.d/references/main.bib}\n"
               "#+OPTIONS: H:2 num:t toc:nil ^:nil\n")))
+#+END_SRC
+
+** Startup settings
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (setq inhibit-splash-screen t)
+  (org-agenda-list)
+  (delete-other-windows)
+  (setq initial-buffer-choice (lambda ()
+    (org-agenda nil "t")
+    (get-buffer "*Org Agenda*")))
 #+END_SRC

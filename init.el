@@ -15,7 +15,8 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (counsel-projectile go-mode python-mode sr-speedbar company-quickhelp company-flx company rainbow-delimiters leuven-theme gnuplot-mode gnuplot helm-projectile projectile smex flx-ido ido-ubiquitous helm-bibtex helm-gtags helm magit auctex use-package))))
+    (counsel-projectile go-mode python-mode sr-speedbar company-quickhelp company-flx company rainbow-delimiters leuven-theme gnuplot-mode gnuplot helm-projectile projectile smex flx-ido ido-ubiquitous helm-bibtex helm-gtags helm magit auctex use-package)))
+ '(pdf-view-midnight-colors (quote ("#FDF4C1" . "#282828")) t))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
