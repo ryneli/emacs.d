@@ -37,7 +37,8 @@
 #+BEGIN_SRC emacs-lisp :tangle yes
   (lzq-info "setup personal info")
   (setq user-full-name "Zhenqiang Li"
-        user-email-address "lizhenqiangsnake@gmail.com")
+	user-email-address "lizhenqiangsnake@gmail.com"
+	user-gtd-directory "~/.dailylife")
 #+END_SRC
 
 *** bootstrap packages
@@ -287,7 +288,7 @@ https://lepisma.github.io/2017/10/28/ricing-org-mode/
   
 *** org agenda
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (setq org-agenda-files '("~/.dailylife"))
+  (setq org-agenda-files (list user-gtd-directory))
 #+END_SRC
 
 *** Gnuplot
@@ -304,6 +305,12 @@ https://lepisma.github.io/2017/10/28/ricing-org-mode/
     :ensure t
     :commands (org-bullets-mode)
     :init (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+#+END_SRC
+
+*** org capture settings
+https://emacs.cafe/emacs/orgmode/gtd/2017/06/30/orgmode-gtd.html
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (setq org-default-notes-file (concat user-gtd-directory "/inbox.org"))
 #+END_SRC
 ** Languages specific
 *** python
