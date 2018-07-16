@@ -244,7 +244,7 @@ http://bnbeckwith.com/bnb-emacs/
 ** org-mode configure
 #+BEGIN_SRC emacs-lisp :tangle yes
   (setq org-todo-keywords
-        '((sequence "TODO" "BLOCKED" "DONE")))
+        '((sequence "TODO" "BLOCKED" "DEPRECATED" "DONE")))
   ;; active babel support languange
   (org-babel-do-load-languages
    'org-babel-load-languages
