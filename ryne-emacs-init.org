@@ -242,6 +242,8 @@ http://bnbeckwith.com/bnb-emacs/
 #+END_SRC
     
 ** org-mode configure
+*** TODO general
+- [ ] conditional set "(sh . t)" or "(shell . t)". https://github.com/bbatsov/emacs-lisp-style-guide
 #+BEGIN_SRC emacs-lisp :tangle yes
   (setq org-todo-keywords
         '((sequence "TODO" "BLOCKED" "DEPRECATED" "DONE")))
