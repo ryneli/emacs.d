@@ -37,8 +37,8 @@
 #+BEGIN_SRC emacs-lisp :tangle yes
   (lzq-info "setup personal info")
   (setq user-full-name "Zhenqiang Li"
-	user-email-address "lizhenqiangsnake@gmail.com"
-	user-gtd-directory "~/.dailylife")
+        user-email-address "lizhenqiangsnake@gmail.com"
+        user-gtd-directory "~/Dropbox/org-mode")
 #+END_SRC
 
 *** bootstrap packages
@@ -251,7 +251,7 @@ http://bnbeckwith.com/bnb-emacs/
    '((dot . t)
      (python . t)
      (ditaa . t)
-     (shell . t)
+     (sh . t)
      (java . t)
      (C . t)
      (scheme . t)
@@ -275,8 +275,6 @@ http://bnbeckwith.com/bnb-emacs/
     '("latexmk -pdflatex='pdflatex -interaction nonstopmode' -pdf -bibtex -f %f"))
 #+END_SRC
 *** org theme
-**** cool theme, need to learn how to set correctly
-https://lepisma.github.io/2017/10/28/ricing-org-mode/
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package leuven-theme
       :ensure t
@@ -285,7 +283,7 @@ https://lepisma.github.io/2017/10/28/ricing-org-mode/
       ;; Ever-so-slightly darker background
       (set-face-background 'default "#F7F7F7"))
 #+END_SRC
-  
+  - Neat theme :: https://lepisma.github.io/2017/10/28/ricing-org-mode/, *Will try when I have time*
 *** org agenda
 #+BEGIN_SRC emacs-lisp :tangle yes
   (setq org-agenda-files (list user-gtd-directory))
@@ -311,6 +309,14 @@ https://lepisma.github.io/2017/10/28/ricing-org-mode/
 https://emacs.cafe/emacs/orgmode/gtd/2017/06/30/orgmode-gtd.html
 #+BEGIN_SRC emacs-lisp :tangle yes
   (setq org-default-notes-file (concat user-gtd-directory "/inbox.org"))
+  (setq org-capture-templates
+        '(("t" "TODO" entry
+           (file+headline (concat user-gtd-directory "/inbox-todo.org") "Tasks")
+           "* TODO %i%?")
+          ("T" "Tickler" entry
+           (file+headline (concat user-gtd-directory "/inbox-tickler.org") "Tickler")
+           "* %i%? \n %U")))
+  (global-set-key (kbd "C-c c") 'org-capture)
 #+END_SRC
 ** Languages specific
 *** python
@@ -343,26 +349,6 @@ https://emacs.cafe/emacs/orgmode/gtd/2017/06/30/orgmode-gtd.html
     :config
     (add-hook 'scheme-mode-hook 'geiser-mode))
 
-#+END_SRC
-
-*** Latex (move this to org mode settings?)
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package tex :ensure auctex)
-#+END_SRC
-**** header template for latex
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (defun ryne-org-latex-header ()
-    (interactive)
-    (progn
-      (insert "#+TITLE: \n"
-              "#+AUTHOR: \n"
-              "#+DATE: \\today \n"
-              ;; avoid redbox around link
-              "#+LATEX_HEADER: \\hypersetup{hidelinks=true}\n"
-              ;; correct reference, just use \cite{key} for reference, see helm-bibtex for more info
-              "#+LaTeX_HEADER: \\usepackage[backend=bibtex,sorting=none]{biblatex}\n"
-              "#+LaTeX_HEADER: \\addbibresource{~/.emacs.d/references/main.bib}\n"
-              "#+OPTIONS: H:2 num:t toc:nil ^:nil\n")))
 #+END_SRC
 
 ** Startup settings
