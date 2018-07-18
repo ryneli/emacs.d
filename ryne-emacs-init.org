@@ -37,8 +37,8 @@
 #+BEGIN_SRC emacs-lisp :tangle yes
   (lzq-info "setup personal info")
   (setq user-full-name "Zhenqiang Li"
-        user-email-address "lizhenqiangsnake@gmail.com"
-        user-gtd-directory "~/Dropbox/org-mode")
+	user-email-address "lizhenqiangsnake@gmail.com"
+	user-gtd-directory "~/.dailylife")
 #+END_SRC
 
 *** bootstrap packages
@@ -241,6 +241,7 @@ http://bnbeckwith.com/bnb-emacs/
   (setq set-mark-command-repeat-pop t)
 #+END_SRC
     
+
 ** org-mode configure
 *** TODO general
 - [ ] conditional set "(sh . t)" or "(shell . t)". https://github.com/bbatsov/emacs-lisp-style-guide
@@ -253,7 +254,7 @@ http://bnbeckwith.com/bnb-emacs/
    '((dot . t)
      (python . t)
      (ditaa . t)
-     (sh . t)
+     (shell . t)
      (java . t)
      (C . t)
      (scheme . t)
