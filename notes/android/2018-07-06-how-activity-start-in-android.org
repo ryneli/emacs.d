@@ -8,7 +8,6 @@
 - ActivityStack :: the stack of activity in AMS
 - ActivityRecord :: the representative of an activity in the ActivityStack
 - TaskRecord :: Used to keep the order of starting and exiting an activity *Not clear*
-
 - ActivityStarter :: Turning intent and flags into activity and associated task and stack.
 
 * startActivityForResult breakdown (communication between ActivityThread and AMS)
@@ -37,6 +36,9 @@ When starting activity via ADB, am.java will start a similar process.
 
 * from the perspective of systrace
 http://riteattitude.blogspot.com/2011/11/android-zygote-and-processes.html
+** [optional] ContentProvider init
+ActivityThread -> AMS#publishContentProviders
+
 ** ZygoteInit - init new process after forking
 1. gcAndFinalize()
 
