@@ -1,10 +1,9 @@
-* Configuration
-** About this file
+* About this file
  Based on Sacha Chua's Emacs configuration
 
 
-** Basic manual
-*** required software
+* Basic manual
+** required software
 - sudo apt install gnuplot
 - sudo apt install texlive-full
 - sudo apt install clang
@@ -13,11 +12,11 @@
 - sudo apt install ditaa
 - sudo apt install graphviz
 
-*** start as daemon
+** start as daemon
 1. add `emacs --daemon` in .bashrc or .zshrc
 2. bind `Ctrl Alt z` to command `emacsclient -c`
 
-*** use-package basic
+** use-package basic
 #+BEGIN_SRC emacs-lisp
   (use-package <package-name>
     :ensure [t/nil] ;; required package or not
@@ -26,14 +25,14 @@
     )
 #+END_SRC
 
-** General configuration
-*** common functions
+* General configuration
+** common functions
 #+BEGIN_SRC emacs-lisp :tangle yes
   (defun lzq-info (str)
     "log STR into *message* buffer"
     (message (concat "LAUNCH-STEP: " str)))
 #+END_SRC
-*** Personal information
+** Personal information
 #+BEGIN_SRC emacs-lisp :tangle yes
   (lzq-info "setup personal info")
   (setq user-full-name "Zhenqiang Li"
@@ -41,7 +40,7 @@
 	user-gtd-directory "~/.dailylife")
 #+END_SRC
 
-*** bootstrap packages
+** bootstrap packages
 #+BEGIN_SRC emacs-lisp :tangle yes
   (require 'package)
   (unless (assoc-default "melpa" package-archives)
@@ -66,43 +65,43 @@
   (require 'bind-key)
 #+END_SRC
 
-*** Save current session
+** Save current session
 #+BEGIN_SRC emacs-lisp :tangle yes
   (lzq-info "(desktop-save-mode 1)")
   (desktop-save-mode 1)
 #+END_SRC
 
-*** disable toolbar in window
+** disable toolbar in window
 #+BEGIN_SRC emacs-lisp :tangle yes
   (tool-bar-mode -1)
 #+END_SRC
-*** disable menubar
+** disable menubar
 #+BEGIN_SRC emacs-lisp :tangle yes
   (menu-bar-mode -1)
 #+END_SRC
-*** disable scrollbar
+** disable scrollbar
 #+BEGIN_SRC emacs-lisp :tangle yes
   (scroll-bar-mode -1)
 #+END_SRC
-*** show column number
+** show column number
 #+BEGIN_SRC emacs-lisp :tangle yes
   (column-number-mode t)
 #+END_SRC
-*** show time in mode bar
+** show time in mode bar
 #+BEGIN_SRC emacs-lisp :tangle yes
   (display-time-mode 1)
 #+END_SRC
 
 
 
-** load packages
-*** magit
+*  load packages
+** magit
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package magit
     :ensure t)
 #+END_SRC
 
-*** ivy
+** ivy
 #+BEGIN_SRC emacs-lisp :tangle yes
   ;; ivy
   (use-package ivy
@@ -113,12 +112,12 @@
     (bind-key "C-c C-r" 'ivy-resume))
 #+END_SRC
 
-*** hydra
+** hydra
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package hydra
     :ensure t)
 #+END_SRC
-*** projectile for ivy
+** projectile for ivy
 http://bnbeckwith.com/bnb-emacs/
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package projectile
@@ -182,14 +181,14 @@ http://bnbeckwith.com/bnb-emacs/
 
 #+END_SRC
 
-*** use plantuml for UML
+** use plantuml for UML
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package plantuml-mode
     :ensure t
     :init (setq org-plantuml-jar-path
                 (expand-file-name "~/.emacs.d/bin/plantuml.1.2017.14.jar")))
 #+END_SRC
-*** install company for completion
+** install company for completion
 #+BEGIN_SRC emacs-lisp :tangle yes
     (use-package company :ensure t
       :init (setq company-idle-delay 0.2
@@ -206,7 +205,7 @@ http://bnbeckwith.com/bnb-emacs/
     :config (company-quickhelp-mode 1))
 #+END_SRC
 
-*** powerline
+** powerline
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package powerline
     :ensure t
@@ -215,7 +214,7 @@ http://bnbeckwith.com/bnb-emacs/
       (powerline-default-theme)))
 
 #+END_SRC
-*** server
+** server
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package server
     :config
@@ -232,6 +231,7 @@ http://bnbeckwith.com/bnb-emacs/
     (font-lock-add-keywords
      nil '(("\\<\\(FIX\\|TODO\\|FIXME\\|HACK\\|REFACTOR\\|NOCOMMIT\\)"
             1 font-lock-warning-face t))))
+  (add-watchwords)
 #+END_SRC
    
 ** Navigation
@@ -242,12 +242,27 @@ http://bnbeckwith.com/bnb-emacs/
 #+END_SRC
     
 
-** org-mode configure
-*** TODO general
+* org-mode configure
+** without categories
 - [ ] conditional set "(sh . t)" or "(shell . t)". https://github.com/bbatsov/emacs-lisp-style-guide
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (setq org-todo-keywords
-        '((sequence "TODO" "BLOCKED" "DEPRECATED" "DONE")))
+  (use-package org
+    :mode ("\\.org\\'" . org-mode)
+    :bind
+    (("C-c l" . org-store-link)
+     ("C-c a" . org-agenda)
+     ("C-c b" . org-iswitchb)
+     ("C-c c" . org-capture))
+    :bind
+    (:map org-mode-map
+          ("M-n" . outline-next-visible-heading)
+          ("M-p" . outline-previous-visible-heading))
+    :custom
+    (org-return-follows-link t)
+    (org-agenda-diary-file "~/.org/diary.org")
+    :config
+    (add-to-list 'org-structure-template-alist '("el" "#+BEGIN_SRC emacs-lisp :tangle yes?\n\n#+END_SRC")))
+
   ;; active babel support languange
   (org-babel-do-load-languages
    'org-babel-load-languages
@@ -276,7 +291,34 @@ http://bnbeckwith.com/bnb-emacs/
   (setq org-latex-pdf-process
     '("latexmk -pdflatex='pdflatex -interaction nonstopmode' -pdf -bibtex -f %f"))
 #+END_SRC
-*** org theme
+** Variable Pitch Mode
+from [[https://github.com/jethrokuan/.emacs.d/blob/master/config.org#org-mode-for-gtd][here]]. It is really nice to have.
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (add-hook 'org-mode-hook
+            '(lambda ()
+               (setq line-spacing 0.2) ;; Add more line padding for readability
+               (variable-pitch-mode 1) ;; All fonts with variable pitch.
+               (mapc
+                (lambda (face) ;; Other fonts with fixed-pitch.
+                  (set-face-attribute face nil :inherit 'fixed-pitch))
+                (list 'org-code
+                      'org-link
+                      'org-block
+                      'org-table
+                      'org-block-begin-line
+                      'org-block-end-line
+                      'org-meta-line
+                      'org-document-info-keyword))))
+#+END_SRC
+
+** org-bulletin
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package org-bullets
+    :ensure t
+    :commands (org-bullets-mode)
+    :init (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+#+END_SRC
+** org theme
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package leuven-theme
       :ensure t
@@ -286,27 +328,20 @@ http://bnbeckwith.com/bnb-emacs/
       (set-face-background 'default "#F7F7F7"))
 #+END_SRC
   - Neat theme :: https://lepisma.github.io/2017/10/28/ricing-org-mode/, *Will try when I have time*
-*** org agenda
+** org agenda
 #+BEGIN_SRC emacs-lisp :tangle yes
   (setq org-agenda-files (list user-gtd-directory))
 #+END_SRC
 
-*** Gnuplot
+** Gnuplot
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package gnuplot
     :ensure t)
   (use-package gnuplot-mode
     :ensure t)
 #+END_SRC
-
-*** org-bulletin
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package org-bullets
-    :ensure t
-    :commands (org-bullets-mode)
-    :init (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
-#+END_SRC
-
+* org-mode for GTD
+** Step 1: collecting
 *** org capture settings
 https://emacs.cafe/emacs/orgmode/gtd/2017/06/30/orgmode-gtd.html
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -320,18 +355,36 @@ https://emacs.cafe/emacs/orgmode/gtd/2017/06/30/orgmode-gtd.html
            "* %i%? \n %U")))
   (global-set-key (kbd "C-c c") 'org-capture)
 #+END_SRC
-** Languages specific
-*** python
+** Step 2: processing
+*** org todo sequence
+From https://github.com/jethrokuan/.emacs.d/blob/master/config.org#org-mode-for-gtd
+| keyword   | meaning                                                            |
+|-----------+--------------------------------------------------------------------|
+| TODO      | An item cannot be processed, not cannot be atempted at this moment |
+| NEXT      | An action can be performed at this moment, under certain context   |
+| DONE      | An item that is completed, and ready to be acheved                 |
+| WAITING   | An item that is waiting for an external party                      |
+| HOLD      | An item that is delayed due to circumtance                         |
+| CANCELLED | An item that was once atemped, but no longer considered            |
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (setq org-todo-keywords
+        '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)")
+          (sequence "WAITING(w@/!)" "HOLD(h@/!)" "|" "CANCELLED(c@/!)")))
+
+  (setq org-log-done 'time)
+#+END_SRC
+* Languages specific
+** python
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package python-mode
     :ensure t)
 #+END_SRC
-*** golang
+** golang
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package go-mode
     :ensure t)
 #+END_SRC
-*** scheme
+** scheme
 #+BEGIN_SRC emacs-lisp :tangle yes
   ;; turn on highlight matching brackets when cursor is on one
   (show-paren-mode 1)
@@ -353,12 +406,5 @@ https://emacs.cafe/emacs/orgmode/gtd/2017/06/30/orgmode-gtd.html
 
 #+END_SRC
 
-** Startup settings
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (setq inhibit-splash-screen t)
-  (org-agenda-list)
-  (delete-other-windows)
-  (setq initial-buffer-choice (lambda ()
-    (org-agenda nil "t")
-    (get-buffer "*Org Agenda*")))
-#+END_SRC
+* Startup settings
+
