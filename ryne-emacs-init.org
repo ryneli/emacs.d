@@ -232,6 +232,52 @@ http://bnbeckwith.com/bnb-emacs/
   (add-watchwords)
 #+END_SRC
    
+** TODO smerge-mode for merging git conflicts
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package smerge-mode
+    :bind (("C-c h s" . jethro/hydra-smerge/body))
+    :init
+    (defun jethro/enable-smerge-maybe ()
+      "Auto-enable `smerge-mode' when merge conflict is detected."
+      (save-excursion
+        (goto-char (point-min))
+        (when (re-search-forward "^<<<<<<< " nil :noerror)
+          (smerge-mode 1))))
+    (add-hook 'find-file-hook #'jethro/enable-smerge-maybe :append)
+    :config
+    (defhydra jethro/hydra-smerge (:color pink
+                                          :hint nil
+                                          :pre (smerge-mode 1)
+                                          ;; Disable `smerge-mode' when quitting hydra if
+                                          ;; no merge conflicts remain.
+                                          :post (smerge-auto-leave))
+      "
+     ^Move^       ^Keep^               ^Diff^                 ^Other^
+     ^^-----------^^-------------------^^---------------------^^-------
+     _n_ext       _b_ase               _<_: upper/base        _C_ombine
+     _p_rev       _u_pper              _=_: upper/lower       _r_esolve
+     ^^           _l_ower              _>_: base/lower        _k_ill current
+     ^^           _a_ll                _R_efine
+     ^^           _RET_: current       _E_diff
+     "
+      ("n" smerge-next)
+      ("p" smerge-prev)
+      ("b" smerge-keep-base)
+      ("u" smerge-keep-mine)
+      ("l" smerge-keep-other)
+      ("a" smerge-keep-all)
+      ("RET" smerge-keep-current)
+      ("\C-m" smerge-keep-current)
+      ("<" smerge-diff-base-mine)
+      ("=" smerge-diff-mine-other)
+      (">" smerge-diff-base-other)
+      ("R" smerge-refine)
+      ("E" smerge-ediff)
+      ("C" smerge-combine-with-next)
+      ("r" smerge-resolve)
+      ("k" smerge-kill-current)
+      ("q" nil "cancel" :color blue)))
+#+END_SRC
 ** Navigation
 *** Pop to mark (go back to last position)
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -338,23 +384,22 @@ from [[https://github.com/jethrokuan/.emacs.d/blob/master/config.org#org-mode-fo
     :ensure t)
 #+END_SRC
 * org-mode for GTD
+From https://github.com/jethrokuan/.emacs.d/blob/master/config.org#org-mode-for-gtd
 ** Step 1: collecting
 *** org capture settings
-https://emacs.cafe/emacs/orgmode/gtd/2017/06/30/orgmode-gtd.html
 #+BEGIN_SRC emacs-lisp :tangle yes
   (setq org-default-notes-file (concat user-gtd-directory "/inbox.org"))
   (setq org-capture-templates
         '(("t" "TODO" entry
            (file+headline (concat user-gtd-directory "/inbox-todo.org") "Tasks")
            "* TODO %i%?")
-          ("T" "Tickler" entry
-           (file+headline (concat user-gtd-directory "/inbox-tickler.org") "Tickler")
-           "* %i%? \n %U")))
+          ("e" "email" entry
+           (file+headline (concat user-gtd-directory "/inbox-email.org") "Emails")
+           "* TODO [#A] Reply: %a :@home:@office:" :immediate-finish t)))
   (global-set-key (kbd "C-c c") 'org-capture)
 #+END_SRC
 ** Step 2: processing
 *** org todo sequence
-From https://github.com/jethrokuan/.emacs.d/blob/master/config.org#org-mode-for-gtd
 | keyword   | meaning                                                            |
 |-----------+--------------------------------------------------------------------|
 | TODO      | An item cannot be processed, not cannot be atempted at this moment |
@@ -369,6 +414,25 @@ From https://github.com/jethrokuan/.emacs.d/blob/master/config.org#org-mode-for-
           (sequence "WAITING(w@/!)" "HOLD(h@/!)" "|" "CANCELLED(c@/!)")))
 
   (setq org-log-done 'time)
+#+END_SRC
+* org-mode for note taking
+** Deft
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package deft
+    :ensure t
+    :after org
+    :bind
+    (("C-c n" . deft))
+    :custom
+    (deft-default-extension "org")
+    (deft-directory (concat user-gtd-directory "/deft/"))
+    (deft-use-filename-as-title t))
+#+END_SRC
+* org-mode for Journalling
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package org-journal
+    :custom
+    (org-journal-dir (concat user-gtd-directory "/journal/")))
 #+END_SRC
 * Languages specific
 ** Java

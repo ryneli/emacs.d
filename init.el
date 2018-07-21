@@ -13,6 +13,8 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(org-agenda-diary-file "~/.org/diary.org")
+ '(org-return-follows-link t)
  '(package-selected-packages
    (quote
     (counsel-projectile go-mode python-mode sr-speedbar company-quickhelp company-flx company rainbow-delimiters leuven-theme gnuplot-mode gnuplot helm-projectile projectile smex flx-ido ido-ubiquitous helm-bibtex helm-gtags helm magit auctex use-package)))
