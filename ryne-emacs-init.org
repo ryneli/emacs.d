@@ -1,7 +1,6 @@
 * About this file
  Based on Sacha Chua's Emacs configuration
 
-
 * Basic manual
 ** required software
 - sudo apt install gnuplot
@@ -91,7 +90,6 @@
 #+BEGIN_SRC emacs-lisp :tangle yes
   (display-time-mode 1)
 #+END_SRC
-
 
 
 *  load packages
@@ -241,7 +239,6 @@ http://bnbeckwith.com/bnb-emacs/
   (setq set-mark-command-repeat-pop t)
 #+END_SRC
     
-
 * org-mode configure
 ** without categories
 - [ ] conditional set "(sh . t)" or "(shell . t)". https://github.com/bbatsov/emacs-lisp-style-guide
