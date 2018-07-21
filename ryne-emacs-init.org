@@ -16,7 +16,7 @@
 2. bind `Ctrl Alt z` to command `emacsclient -c`
 
 ** use-package basic
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC
   (use-package <package-name>
     :ensure [t/nil] ;; required package or not
     :init (progn ) ;; run before the package is loaded 
@@ -371,6 +371,12 @@ From https://github.com/jethrokuan/.emacs.d/blob/master/config.org#org-mode-for-
   (setq org-log-done 'time)
 #+END_SRC
 * Languages specific
+** Java
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package google-c-style
+    :commands
+    (google-set-c-style))
+#+END_SRC
 ** python
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package python-mode
